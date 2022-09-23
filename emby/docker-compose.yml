@@ -23,7 +23,7 @@ services:
               capabilities: [gpu]
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.kazu.pw`) || Host(`emby.kazu.pw`)"
+      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.kazu.pw`)"
       - "traefik.http.routers.emby.entrypoints=websecure"
       - "traefik.http.routers.emby.tls=true"
       - "traefik.http.routers.emby.tls.certresolver=le"

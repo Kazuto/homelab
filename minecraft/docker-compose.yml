@@ -12,7 +12,7 @@ services:
       CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.minecraft.rule=HostSNI(`6add8bdd374819ccdcdec2c69903546b.kazu.pw`) || HostSNI(`mc.kazu.pw`)"
+      - "traefik.tcp.routers.minecraft.rule=HostSNI(`mc.kazu.pw`)"
       - "traefik.tcp.routers.minecraft.entrypoints=tcp"
       - "traefik.tcp.routers.minecraft.tls=true"
       - "traefik.tcp.routers.minecraft.tls.certresolver=le"

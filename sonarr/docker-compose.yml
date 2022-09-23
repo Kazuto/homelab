@@ -8,7 +8,7 @@ services:
       TZ: 'Europe/Berlin'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`) || Host(`sonarr.kazu.pw`)"
+      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`)"
       - "traefik.http.routers.sonarr.entrypoints=websecure"
       - "traefik.http.routers.sonarr.tls=true"
       - "traefik.http.routers.sonarr.tls.certresolver=le"
@@ -30,7 +30,7 @@ services:
     container_name: sabnzbd
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.kazu.pw`) || Host(`nzb.kazu.pw`)"
+      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.kazu.pw`)"
       - "traefik.http.routers.sabnzbd.entrypoints=websecure"
       - "traefik.http.routers.sabnzbd.tls=true"
       - "traefik.http.routers.sabnzbd.tls.certresolver=le"

@@ -9,7 +9,7 @@ services:
       WEBPASSWORD: HE%&A%6WQ&x4
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`) || Host(`sonarr.kazu.pw`)"
+      - "traefik.http.routers.pihole.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`)"
       - "traefik.http.routers.pihole.entrypoints=websecure"
       - "traefik.http.routers.pihole.tls=true"
       - "traefik.http.routers.pihole.tls.certresolver=le"
