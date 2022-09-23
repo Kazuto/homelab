@@ -1,0 +1,48 @@
+version: "3.3"
+
+services:
+  emby:
+    image: emby/embyserver:4.8.0.8
+    container_name: emby
+    #runtime: nvidia # Expose NVIDIA GPUs
+    #network_mode: host # Enable DLNA and Wake-on-Lan
+    ports:
+      - 8096:8096 # HTTP port
+      - 8920:8920 # HTTPS port
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6G
+        reservations:
+          cpus: '1'
+          memory: 1G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.kazu.pw`) || Host(`emby.kazu.pw`)"
+      - "traefik.http.routers.emby.entrypoints=websecure"
+      - "traefik.http.routers.emby.tls=true"
+      - "traefik.http.routers.emby.tls.certresolver=le"
+      - "traefik.http.services.emby.loadbalancer.server.port=8096"
+      - "traefik.port=8096"
+      # - "traefik.http.routers.emby.middlewares=basic-auth@docker"
+    volumes:
+      - /e/homelab/emby:/config
+      - /e/backup/emby:/mnt/backup # Backup directory
+      - /d/movies:/mnt/movies # Media directory
+      - /d/shows:/mnt/shows # Media directory
+      - /d/anime:/mnt/anime # Media directory
+    #devices:
+    #  - /dev/dri:/dev/dri # VAAPI/NVDEC/NVENC render nodes
+    #  - /dev/vchiq:/dev/vchiq # MMAL/OMX on Raspberry Pi
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

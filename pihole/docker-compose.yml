@@ -1,0 +1,31 @@
+version: "3.3"
+
+services:
+  pihole:
+    image: pihole/pihole:2022.07.1
+    container_name: pihole
+    environment:
+      TZ: 'Europe/Berlin'
+      WEBPASSWORD: HE%&A%6WQ&x4
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.pihole.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`) || Host(`sonarr.kazu.pw`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.routers.pihole.tls=true"
+      - "traefik.http.routers.pihole.tls.certresolver=le"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"
+      - "traefik.port=80"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "1337:80/tcp"
+    volumes:
+      - '/e/homelab/pihole/pihole:/etc/pihole'
+      - '/e/homelab/pihole/dnsmasq:/etc/dnsmasq.d'    
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

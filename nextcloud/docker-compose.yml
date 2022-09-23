@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+  db:
+    image: mariadb:10.5
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    ports:
+      - 3306:3306
+    volumes:
+      - /e/homelab/mariadb:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=HE%&A%6WQ&x4
+      - MYSQL_PASSWORD=Qc5QEcpY
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    restart: unless-stopped
+
+  nextcloud:
+    image: nextcloud:24.0.3
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nextcloud.rule=Host(`5f40b17473d19a3d763ad2925b4c6014.kazu.pw`) || Host(`cloud.kazu.pw`)"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.tls=true"
+      - "traefik.http.routers.nextcloud.tls.certresolver=le"
+      - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
+      - "traefik.port=80"
+    ports:
+      - 8081:80
+    links:
+      - db
+    volumes:
+      - /e/homelab/nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=Qc5QEcpY
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=db
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

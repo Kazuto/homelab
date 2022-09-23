@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  heimdall:
+    image: linuxserver/heimdall:2.4.13
+    container_name: heimdall
+    ports:
+      - 8082:80
+      - 4434:443
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heimdall.rule=Host(`3594131de4c77a189a6ac09d15ef828a.kazu.pw`) || Host(`heimdall.kazu.pw`)"
+      - "traefik.http.routers.heimdall.entrypoints=websecure"
+      - "traefik.http.routers.heimdall.tls=true"
+      - "traefik.http.routers.heimdall.tls.certresolver=le"
+      - "traefik.http.services.heimdall.loadbalancer.server.port=80"
+      - "traefik.port=80"
+    volumes:
+      - /e/homelab/heimdall:/config
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
