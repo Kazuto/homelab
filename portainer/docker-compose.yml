@@ -12,10 +12,11 @@ services:
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.tls.certresolver=le"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9443"
-      - "traefik.port=9443"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.port=9000"
     ports:
       - 8000:8000
+      - 9000:9000
       - 9443:9443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
