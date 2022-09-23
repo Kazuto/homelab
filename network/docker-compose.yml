@@ -1,0 +1,69 @@
+services:
+  traefik:
+    image: traefik:v2.8
+    container_name: "traefik"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.entrypoints: websecure # Set the Traefik entry point.
+      traefik.http.routers.api.service: api@internal # Enable Traefik API.
+      traefik.http.services.nextcloud.loadbalancer.server.port: 8080
+      traefik.port: 8080
+      homepage.group: Homelab
+      homepage.name: Traefik
+      homepage.icon: traefik.png
+      homepage.widget.type: traefik
+      homepage.widget.url: http://${LOCAL_IP}:${TRAEFIK_DASHBOARD_PORT}
+    environment:
+      - DOMAIN=${DOMAIN}
+      - CLOUDFLARE_DNS_API_TOKEN=${CF_API_KEY}
+    ports:
+      - ${TRAEFIK_HTTP_PORT}:80
+      - ${TRAEFIK_HTTPS_PORT}:443
+      - ${TRAEFIK_DASHBOARD_PORT}:8080
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/network/:/etc/traefik/
+      - ${DOCKER_DATA_DIR}/letsencrypt/:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    networks:
+      - web
+    restart: unless-stopped
+
+  adguard:
+    image: adguard/adguardhome
+    container_name: adguard
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.adguard.entrypoints: websecure
+      traefik.http.routers.adguard.tls: true
+      traefik.http.routers.adguard.tls.certresolver: letsencrypt
+      traefik.http.services.adguard.loadbalancer.server.port: 80
+      traefik.port: 80
+    volumes:
+      - ${DOCKER_DATA_DIR}/adguard/work:/opt/adguardhome/work
+      - ${DOCKER_DATA_DIR}/adguard/conf:/opt/adguardhome/conf
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "${ADGUARD_HTTP_PORT}:80/tcp"
+      - "${ADGUARD_HTTPS_PORT}:3000/tcp"
+    networks:
+      - web
+
+networks:
+  web:
+    name: traefik_web
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24

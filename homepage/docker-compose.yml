@@ -1,0 +1,31 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    environment:
+      # PUID: ${PUID}
+      # PGID: ${PGID}
+      HOMEPAGE_ALLOWED_HOSTS: homepage.fae.sh,${LOCAL_IP}:${HOMEPAGE_HTTPS_PORT} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+    labels:
+      traefik.enable: true
+      traefik.http.routers.homepage.entrypoints: websecure
+      traefik.http.routers.homepage.tls: true
+      traefik.http.routers.homepage.tls.certresolver: letsencrypt
+      traefik.http.services.homepage.loadbalancer.server.port: 3000
+      traefik.port: 3000
+    ports:
+      - ${HOMEPAGE_HTTPS_PORT}:3000
+    networks:
+      - web
+    volumes:
+      - ${DOCKER_DATA_DIR}/homepage/config:/app/config # Make sure your local config directory exists
+      - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
+      - /mnt/media:/mnt/media
+      - /mnt/shows:/mnt/shows
+      - /mnt/storage:/mnt/storage
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

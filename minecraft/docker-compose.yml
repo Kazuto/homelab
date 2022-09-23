@@ -1,28 +1,24 @@
-version: "3.3"
-
 services:
   minecraft:
     image: itzg/minecraft-server
     container_name: minecraft
     environment:
       EULA: "TRUE"
-      TYPE: "CURSEFORGE"
-      # VERSION: 1.18.2
-      # FORGEVERSION: 40.1.74
-      CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
+      TYPE: "AUTO_CURSEFORGE"
+      # CF_SERVER_MOD: "/modpacks/Craftoria-Server-1.6.1.zip"
+      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
+      CF_API_KEY: ${CF_API_KEY}
+      MEMORY: 10G
     labels:
-      - "traefik.enable=true"
-      - "traefik.tcp.routers.minecraft.rule=HostSNI(`6add8bdd374819ccdcdec2c69903546b.kazu.pw`) || HostSNI(`mc.kazu.pw`)"
-      - "traefik.tcp.routers.minecraft.entrypoints=tcp"
-      - "traefik.tcp.routers.minecraft.tls=true"
-      - "traefik.tcp.routers.minecraft.tls.certresolver=le"
-      - "traefik.tcp.services.minecraft.loadbalancer.server.port=25565"
-      - "traefik.port=25565"
+      traefik.enable: true
+      traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
+      traefik.tcp.routers.minecraft.entrypoints: tcp
+      traefik.port: 25565
     ports:
-      - 25565:25565
+      - ${MINECRAFT_TCP_PORT}:25565
     volumes:
-      - '/e/homelab/minecraft/atm7sky:/data'
-      - '/e/homelab/minecraft/modpacks:/modpacks'
+      - '${DOCKER_DATA_DIR}/minecraft/atm10:/data'
+      - '${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks'
     tty: true
     stdin_open: true
     networks:
@@ -32,3 +28,4 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true

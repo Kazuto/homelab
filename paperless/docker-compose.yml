@@ -1,0 +1,64 @@
+services:
+  broker:
+    image: docker.io/library/redis:7
+    restart: unless-stopped
+    networks:
+      - paperless
+    volumes:
+      - ${DOCKER_DATA_DIR}/paperless/redis:/data
+
+  db:
+    image: docker.io/library/postgres:17
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DATA_DIR}/paperless/postgresql:/var/lib/postgresql/data
+    networks:
+      - paperless
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+      - broker
+    labels:
+      traefik.enable: true
+      traefik.http.routers.paperless.rule: Host(`docs.${DOMAIN}`)
+      traefik.http.routers.paperless.entrypoints: websecure
+      traefik.http.routers.paperless.tls: true
+      traefik.http.routers.paperless.tls.certresolver: letsencrypt
+      traefik.http.services.paperless.loadbalancer.server.port: 8000
+      traefik.port: 8000
+      homepage.group: Media
+      homepage.name: Paperless
+      homepage.icon: paperless-ngx.png
+      homepage.href: https://docs.${DOMAIN}
+      homepage.widget.type: paperlessngx
+      homepage.widget.key: ${PAPERLESS_API_KEY}
+      homepage.widget.url: http://${LOCAL_IP}:${PAPERLESS_HTTP_PORT}
+    ports:
+      - ${PAPERLESS_HTTP_PORT}:8000
+    volumes:
+      - ${DOCKER_DATA_DIR}/paperless/data:/usr/src/paperless/data
+      - ${DOCKER_DATA_DIR}/paperless/media:/usr/src/paperless/media
+      - ${DOCKER_DATA_DIR}/paperless/media:/usr/src/paperless/media
+      - /mnt/storage/documents/export:/usr/src/paperless/export
+      - /mnt/storage/documents/import:/usr/src/paperless/consume
+    networks:
+      - web
+      - paperless
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_URL: https://docs.${DOMAIN}
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  paperless:
+    name: paperless

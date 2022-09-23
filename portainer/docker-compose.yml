@@ -1,25 +1,30 @@
-version: "3.3"
-
 services:
   portainer:
-    image: portainer/portainer-ce:2.15.1
+    image: portainer/portainer-ce:lts
     container_name: portainer
     environment:
-      TZ: 'Europe/Berlin'
+      TZ: ${TZ}
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`80d0dd0e0b023e6f976d188c53351968.kazu.pw`) || Host(`portainer.kazu.pw`)"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
-      - "traefik.http.routers.portainer.tls=true"
-      - "traefik.http.routers.portainer.tls.certresolver=le"
-      - "traefik.http.services.portainer.loadbalancer.server.port=8000"
-      - "traefik.port=8000"
+      traefik.enable: true
+      traefik.http.routers.portainer.entrypoints: websecure
+      traefik.http.routers.portainer.tls: true
+      traefik.http.routers.portainer.tls.certresolver: letsencrypt
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
+      traefik.port: 9000
+      homepage.group: Homelab
+      homepage.name: Portainer
+      homepage.icon: portainer.png
+      homepage.href: https://portainer.${DOMAIN}
+      homepage.widget.type: portainer
+      homepage.widget.url: http://${LOCAL_IP}:${PORTAINER_GUI_PORT}
+      homepage.widget.env: 3
+      homepage.widget.key: ${PORTAINER_API_KEY}
     ports:
-      - 8000:8000
-      - 9443:9443
+      - ${PORTAINER_SSH_PORT}:8000
+      - ${PORTAINER_GUI_PORT}:9000
     volumes:
+      - ${DOCKER_DATA_DIR}/portainer/:/data
       - /var/run/docker.sock:/var/run/docker.sock
-      - /e/homelab/portainer/:/data
     networks:
       - web
     restart: unless-stopped
@@ -27,3 +32,5 @@ services:
 networks:
   web:
     name: traefik_web
+    driver: bridge
+    external: true
