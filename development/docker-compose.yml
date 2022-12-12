@@ -1,0 +1,32 @@
+version: "3.3"
+
+services:
+  code:
+    image: linuxserver/code-server:4.9.0
+    container_name: code
+    ports:
+      - 8443:8443 # HTTP port
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.code.rule=Host(`799e30b8c7f3ad8c33d910ad2a183924.kazu.pw`)"
+      - "traefik.http.routers.code.entrypoints=websecure"
+      - "traefik.http.routers.code.tls=true"
+      - "traefik.http.routers.code.tls.certresolver=le"
+      - "traefik.http.services.code.loadbalancer.server.port=8443"
+      - "traefik.port=8443"
+    volumes:
+      - /f/homelab/code/config:/config
+      - /f/homelab/emby/themes:/config/workspace/emby-themes
+    environment:
+      - SUDO_PASSWORD=password # If this optional variable is set, user will have sudo access in the code-server terminal with the specified password.
+      - TZ=Europe/Berlin # Specify a timezone to use EG Europe/London
+      - PUID=1000 # for UserID
+      - PGID=1000 # for GroupID
+      - PASSWORD=password # Optional web gui password, if not provided, there will be no auth.
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

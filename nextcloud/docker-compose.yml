@@ -7,7 +7,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - /e/homelab/mariadb:/var/lib/mysql
+      - /f/homelab/mariadb:/var/lib/mysql
     environment:
       - MYSQL_ROOT_PASSWORD=HE%&A%6WQ&x4
       - MYSQL_PASSWORD=Qc5QEcpY
@@ -38,7 +38,7 @@ services:
     links:
       - db
     volumes:
-      - /e/homelab/nextcloud:/var/www/html
+      - /f/homelab/nextcloud:/var/www/html
     environment:
       - MYSQL_PASSWORD=Qc5QEcpY
       - MYSQL_DATABASE=nextcloud

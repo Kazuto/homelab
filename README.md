@@ -1,23 +1,24 @@
 
 ## Used ports
 
-| Service | Port | Type |
+| Port | Service | Type |
 |------|------|---------|
-| Traefik | 80 | Entrypoint-HTTP |
-| Traefik | 443 | Entrypoint-HTTPS |
-| Traefik | 8080 | Entrypoint-TCP |
-| Traefik | 9090 | HTTPS |
-| SABnzbd | 8888 | HTTP |
-| Sonarr | 8989 | HTTP |
-| Portainer | 8000 | HTTP |
-| Portainer | 9000 | HTTPS |
-| Portainer | 9443 | HTTPS |
-| Pi-hole | 53 | DNS |
-| Pi-hole | 1337 | HTTPS |
-| MariaDB | 3306 | TCP |
-| Nextcloud | 8081 | HTTPS |
-| Minecraft | 25565 | TCP |
-| Heimdall | 8082 | HTTP |
-| Heimdall | 4434 | HTTPS |
-| Emby | 8096 | HTTP |
-| Emby | 8920 | HTTPS |
+| 53 | Pi-hole | DNS |
+| 80 | Traefik | Entrypoint-HTTP |
+| 443 | Traefik | Entrypoint-HTTPS |
+| 1337 | Pi-hole | HTTPS |
+| 3306 | MariaDB | TCP |
+| 4434 | Heimdall | HTTPS |
+| 8000 | Portainer | HTTP |
+| 8080 | Traefik | Entrypoint-TCP |
+| 8081 | Nextcloud | HTTPS |
+| 8082 | Heimdall | HTTP |
+| 8096 | Emby | HTTP |
+| 8443 | VS Code | HTTP |
+| 8888 | SABnzbd | HTTP |
+| 8920 | Emby | HTTPS |
+| 8989 | Sonarr | HTTP |
+| 9000 | Portainer | HTTPS |
+| 9090 | Traefik | HTTPS |
+| 9443 | Portainer | HTTPS |
+| 25565 | Minecraft | TCP |

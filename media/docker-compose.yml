@@ -1,0 +1,93 @@
+version: "3.3"
+
+services:
+  emby:
+    image: emby/embyserver:4.8.0.21
+    container_name: emby
+    #runtime: nvidia # Expose NVIDIA GPUs
+    #network_mode: host # Enable DLNA and Wake-on-Lan
+    ports:
+      - 8096:8096 # HTTP port
+      - 8920:8920 # HTTPS port
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6G
+        reservations:
+          cpus: '1'
+          memory: 1G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.kazu.pw`)"
+      - "traefik.http.routers.emby.entrypoints=websecure"
+      - "traefik.http.routers.emby.tls=true"
+      - "traefik.http.routers.emby.tls.certresolver=le"
+      - "traefik.http.services.emby.loadbalancer.server.port=8096"
+      - "traefik.port=8096"
+      # - "traefik.http.routers.emby.middlewares=basic-auth@docker"
+    volumes:
+      - /f/homelab/emby/config:/config
+      - /f/homelab/emby/themes:/system/dashboard-ui/modules/themes
+      - /f/backup/emby:/mnt/backup # Backup directory
+      - /d/movies:/mnt/movies # Media directory
+      - /e/shows:/mnt/shows # Media directory
+      - /e/anime:/mnt/anime # Media directory
+    #devices:
+    #  - /dev/dri:/dev/dri # VAAPI/NVDEC/NVENC render nodes
+    #  - /dev/vchiq:/dev/vchiq # MMAL/OMX on Raspberry Pi
+    networks:
+      - web
+    restart: unless-stopped
+    
+  sonarr:
+    image: linuxserver/sonarr:3.0.9
+    container_name: sonarr
+    environment:
+      TZ: 'Europe/Berlin'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.routers.sonarr.tls=true"
+      - "traefik.http.routers.sonarr.tls.certresolver=le"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+      - "traefik.port=8989"
+    ports:
+      - 8989:8989
+    volumes:
+      - '/f/homelab/sonarr/data:/config'
+      - '/e/shows/:/tv'
+      - '/e/anime/:/anime'
+      - '/f/homelab/sonarr/downloadclient-downloads:/downloads'
+    networks:
+      - web
+    restart: unless-stopped
+
+  sabnzbd:
+    image: sabnzbd/sabnzbd:3.2.1
+    container_name: sabnzbd
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.kazu.pw`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=websecure"
+      - "traefik.http.routers.sabnzbd.tls=true"
+      - "traefik.http.routers.sabnzbd.tls.certresolver=le"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8888"
+      - "traefik.port=8888"
+    ports:
+      - 8888:8888
+    volumes:
+      - '/f/homelab/sabnzbd:/datadir'
+      - '/f/downloads:/media'
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

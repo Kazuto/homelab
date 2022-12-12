@@ -1,0 +1,35 @@
+version: "3.3"
+
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    environment:
+      EULA: "TRUE"
+      TYPE: "CURSEFORGE"
+      CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
+      #TYPE: "FTBA"
+      #FTB_MODPACK_ID: 95
+      #FTB_MODPACK_VERSION_ID: 2239
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.minecraft.rule=HostSNI(`mc.kazu.pw`)"
+      - "traefik.tcp.routers.minecraft.entrypoints=tcp"
+      # - "traefik.tcp.routers.minecraft.tls=true"
+      # - "traefik.tcp.routers.minecraft.tls.certresolver=le"
+      # - "traefik.tcp.services.minecraft.loadbalancer.server.port=25565"
+      - "traefik.port=25565"
+    ports:
+      - 25565:25565
+    volumes:
+      - '/f/homelab/minecraft/atm7sky:/data'
+      - '/f/homelab/minecraft/modpacks:/modpacks'
+    tty: true
+    stdin_open: true
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
