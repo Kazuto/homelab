@@ -1,7 +1,8 @@
 version: '2'
 
 services:
-  db:
+  mariadb:
+    container_name: mariadb
     image: mariadb:10.5
     command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
     ports:
@@ -13,41 +14,71 @@ services:
       - MYSQL_PASSWORD=Qc5QEcpY
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
+    networks:
+      - web
+    restart: unless-stopped
+
+  postgres:
+    container_name: postgres
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    volumes:
+      - /f/homelab/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=HE%&A%6WQ&x4
+    networks:
+      - web
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis:7.0.8
+    ports:
+      - 6379:6379
+    networks:
+      - web
     restart: unless-stopped
 
   nextcloud:
-    image: nextcloud:24.0.3
+    container_name: nextcloud
+    image: nextcloud:25.0.3
     deploy:
       resources:
-        limits:
+        reservations:
           cpus: '1'
           memory: 4G
-        reservations:
-          cpus: '0.5'
-          memory: 1G
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nextcloud.rule=Host(`5f40b17473d19a3d763ad2925b4c6014.kazu.pw`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`cloud.kazu.pw`) || Host(`5f40b17473d19a3d763ad2925b4c6014.kazu.pw`)"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
       - "traefik.http.routers.nextcloud.tls=true"
       - "traefik.http.routers.nextcloud.tls.certresolver=le"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
       - "traefik.port=80"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud_redirectregex"
+      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.regex=https://(.*)/.well-known/(?:card|cal)dav"
+      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.replacement=https://$${1}/remote.php/dav"
     ports:
       - 8081:80
     links:
-      - db
+      - mariadb
+      - postgres
+      - redis
     volumes:
       - /f/homelab/nextcloud:/var/www/html
     environment:
-      - MYSQL_PASSWORD=Qc5QEcpY
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_HOST=db
+      - REDIS_HOST=redis
     networks:
       - web
+      - nextcloud
     restart: unless-stopped
 
 networks:
   web:
     name: traefik_web
+  nextcloud:
+    name: nextcloud_web

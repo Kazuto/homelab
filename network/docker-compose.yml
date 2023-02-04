@@ -137,6 +137,26 @@ services:
     networks:
       - web
     restart: unless-stopped
+
+  vaultwarden:
+    image: vaultwarden/server:1.27.0
+    container_name: vaultwarden
+    ports:
+      - 8083:80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vaultwarden.rule=Host(`6e48d67113cb48e9767902313f73cea5.kazu.pw`)"
+      - "traefik.http.routers.vaultwarden.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden.tls=true"
+      - "traefik.http.routers.vaultwarden.tls.certresolver=le"
+      - "traefik.http.services.vaultwarden.loadbalancer.server.port=80"
+      - "traefik.port=80"
+    volumes:
+      - /f/homelab/vaultwarden:/data/
+    networks:
+      - web
+    restart: unless-stopped
+    
 networks:
   web:
     name: traefik_web
