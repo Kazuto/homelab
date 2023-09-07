@@ -13,6 +13,9 @@
 | 8080 | Traefik | Entrypoint-TCP |
 | 8081 | Nextcloud | HTTPS |
 | 8082 | Heimdall | HTTP |
+| 8083 | Vaultwarden | HTTP |
+| 8084 | Calibre | HTTP |
+| 8085 | Calibre | HTTP |
 | 8096 | Emby | HTTP |
 | 8443 | VS Code | HTTP |
 | 8888 | SABnzbd | HTTP |
