@@ -8,7 +8,7 @@ services:
       - 8443:8443 # HTTP port
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.code.rule=Host(`799e30b8c7f3ad8c33d910ad2a183924.kazu.pw`)"
+      - "traefik.http.routers.code.rule=Host(`799e30b8c7f3ad8c33d910ad2a183924.fae.sh`)"
       - "traefik.http.routers.code.entrypoints=websecure"
       - "traefik.http.routers.code.tls=true"
       - "traefik.http.routers.code.tls.certresolver=le"

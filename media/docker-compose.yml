@@ -23,7 +23,7 @@ services:
               capabilities: [gpu]
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.kazu.pw`)"
+      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.fae.sh`) || Host(`emby.fae.sh`)"
       - "traefik.http.routers.emby.entrypoints=websecure"
       - "traefik.http.routers.emby.tls=true"
       - "traefik.http.routers.emby.tls.certresolver=le"
@@ -51,7 +51,7 @@ services:
       TZ: 'Europe/Berlin'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.kazu.pw`)"
+      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.fae.sh`)"
       - "traefik.http.routers.sonarr.entrypoints=websecure"
       - "traefik.http.routers.sonarr.tls=true"
       - "traefik.http.routers.sonarr.tls.certresolver=le"
@@ -73,7 +73,7 @@ services:
     container_name: sabnzbd
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.kazu.pw`)"
+      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.fae.sh`)"
       - "traefik.http.routers.sabnzbd.entrypoints=websecure"
       - "traefik.http.routers.sabnzbd.tls=true"
       - "traefik.http.routers.sabnzbd.tls.certresolver=le"

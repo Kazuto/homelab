@@ -6,7 +6,7 @@ services:
     container_name: "cloudflare-ddns"
     environment:
       - API_KEY=AskVh21xlQsQWDh_VpkqDTANWfHlW72lJEVYnHPP
-      - ZONE=kazu.pw
+      - ZONE=fae.sh
       - CRON=*/5 * * * *
     restart: unless-stopped
   
@@ -32,7 +32,7 @@ services:
       - "--entryPoints.websecure.forwardedHeaders.trustedIPs=127.0.0.1/32,172.23.0.1"
       
       - "--certificatesresolvers.le.acme.tlschallenge=true"
-      - "--certificatesresolvers.le.acme.email=kai@mayer.ws"
+      - "--certificatesresolvers.le.acme.email=kai@fae.sh"
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
 
       - "--entrypoints.tcp.address=:9090"
@@ -43,7 +43,7 @@ services:
       - "traefik.enable=true"
       - "traefik.port=8080"
       - "traefik.http.middlewares.admin-auth.basicauth.users=kazuto:$$2y$$10$$kZJcpW4wVIdkJzWGfHQLGu.r1MZef6bb98f/RRW9ANHN.G9zPkZuO"
-      - "traefik.http.routers.traefik.rule=Host(`24611ab636a8abe2c574218526bbb40c.kazu.pw`)"
+      - "traefik.http.routers.traefik.rule=Host(`24611ab636a8abe2c574218526bbb40c.fae.sh`)"
       - "traefik.http.routers.traefik.entrypoints=websecure"
       - "traefik.http.routers.traefik.tls=true"
       - "traefik.http.routers.traefik.tls.certresolver=le"
@@ -77,7 +77,7 @@ services:
       WEBPASSWORD: HE%&A%6WQ&x4
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(`f2482f7878ecee30c686f1c5ee09d76e.kazu.pw`)"
+      - "traefik.http.routers.pihole.rule=Host(`f2482f7878ecee30c686f1c5ee09d76e.fae.sh`)"
       - "traefik.http.routers.pihole.entrypoints=websecure"
       - "traefik.http.routers.pihole.tls=true"
       - "traefik.http.routers.pihole.tls.certresolver=le"
@@ -101,7 +101,7 @@ services:
       TZ: 'Europe/Berlin'
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`80d0dd0e0b023e6f976d188c53351968.kazu.pw`)"
+      - "traefik.http.routers.portainer.rule=Host(`80d0dd0e0b023e6f976d188c53351968.fae.sh`)"
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.tls.certresolver=le"
@@ -126,7 +126,7 @@ services:
       - 4434:443
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`3594131de4c77a189a6ac09d15ef828a.kazu.pw`) || Host(`heimdall.kazu.pw`)"
+      - "traefik.http.routers.heimdall.rule=Host(`3594131de4c77a189a6ac09d15ef828a.fae.sh`) || Host(`heimdall.fae.sh`)"
       - "traefik.http.routers.heimdall.entrypoints=websecure"
       - "traefik.http.routers.heimdall.tls=true"
       - "traefik.http.routers.heimdall.tls.certresolver=le"
@@ -145,7 +145,7 @@ services:
       - 8083:80
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vaultwarden.rule=Host(`6e48d67113cb48e9767902313f73cea5.kazu.pw`)"
+      - "traefik.http.routers.vaultwarden.rule=Host(`6e48d67113cb48e9767902313f73cea5.fae.sh`) || Host(`warden.fae.sh`)"
       - "traefik.http.routers.vaultwarden.entrypoints=websecure"
       - "traefik.http.routers.vaultwarden.tls=true"
       - "traefik.http.routers.vaultwarden.tls.certresolver=le"
