@@ -42,13 +42,13 @@ services:
       - DOCSPELL_SERVER_BACKEND_SIGNUP_NEW__INVITE__PASSWORD=
       - DOCSPELL_SERVER_BACKEND_ADDONS_ENABLED=false
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.restserver.rule=Host(`docspell.fae.sh`)"
-      - "traefik.http.routers.restserver.entrypoints=websecure"
-      - "traefik.http.routers.restserver.tls=true"
-      - "traefik.http.routers.restserver.tls.certresolver=le"
-      - "traefik.http.services.restserver.loadbalancer.server.port=7880"
-      - "traefik.port=7880"
+      traefik.enable: true
+      traefik.http.routers.restserver.rule: Host(`docspell.fae.sh`)
+      traefik.http.routers.restserver.entrypoints: websecure
+      traefik.http.routers.restserver.tls: true
+      traefik.http.routers.restserver.tls.certresolver: letsencrypt
+      traefik.http.services.restserver.loadbalancer.server.port: 7880
+      traefik.port: 7880
     networks:
       - web
       - docspell

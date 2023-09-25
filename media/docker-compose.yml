@@ -22,14 +22,14 @@ services:
               count: 1
               capabilities: [gpu]
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.emby.rule=Host(`7428b493ccb3325b73789e686db40bf3.fae.sh`) || Host(`emby.fae.sh`)"
-      - "traefik.http.routers.emby.entrypoints=websecure"
-      - "traefik.http.routers.emby.tls=true"
-      - "traefik.http.routers.emby.tls.certresolver=le"
-      - "traefik.http.services.emby.loadbalancer.server.port=8096"
-      - "traefik.port=8096"
-      # - "traefik.http.routers.emby.middlewares=basic-auth@docker"
+      traefik.enable: true
+      traefik.http.routers.emby.rule: Host(`7428b493ccb3325b73789e686db40bf3.fae.sh`) || Host(`emby.fae.sh`)
+      traefik.http.routers.emby.entrypoints: websecure
+      traefik.http.routers.emby.tls: true
+      traefik.http.routers.emby.tls.certresolver: letsencrypt
+      traefik.http.services.emby.loadbalancer.server.port: 8096
+      traefik.port: 8096
+      # traefik.http.routers.emby.middlewares=basic-auth@docker"
     volumes:
       - /f/docker/data/emby/config:/config
       - /f/docker/data/emby/themes:/system/dashboard-ui/modules/themes
@@ -51,13 +51,13 @@ services:
     environment:
       TZ: 'Europe/Berlin'
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sonarr.rule=Host(`9ddb2697ec3311eedd470d790104b4a7.fae.sh`)"
-      - "traefik.http.routers.sonarr.entrypoints=websecure"
-      - "traefik.http.routers.sonarr.tls=true"
-      - "traefik.http.routers.sonarr.tls.certresolver=le"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
-      - "traefik.port=8989"
+      traefik.enable: true
+      traefik.http.routers.sonarr.rule: Host(`9ddb2697ec3311eedd470d790104b4a7.fae.sh`)
+      traefik.http.routers.sonarr.entrypoints: websecure
+      traefik.http.routers.sonarr.tls: true
+      traefik.http.routers.sonarr.tls.certresolver: letsencrypt
+      traefik.http.services.sonarr.loadbalancer.server.port: 8989
+      traefik.port: 8989
     ports:
       - 8989:8989
     volumes:
@@ -73,13 +73,13 @@ services:
     image: sabnzbd/sabnzbd:3.2.1
     container_name: sabnzbd
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.sabnzbd.rule=Host(`c22c230d554fcdde10136d735191c304.fae.sh`)"
-      - "traefik.http.routers.sabnzbd.entrypoints=websecure"
-      - "traefik.http.routers.sabnzbd.tls=true"
-      - "traefik.http.routers.sabnzbd.tls.certresolver=le"
-      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8888"
-      - "traefik.port=8888"
+      traefik.enable: true
+      traefik.http.routers.sabnzbd.rule: Host(`c22c230d554fcdde10136d735191c304.fae.sh`)
+      traefik.http.routers.sabnzbd.entrypoints: websecure
+      traefik.http.routers.sabnzbd.tls: true
+      traefik.http.routers.sabnzbd.tls.certresolver: letsencrypt
+      traefik.http.services.sabnzbd.loadbalancer.server.port: 8888
+      traefik.port: 8888
     ports:
       - 8888:8888
     volumes:
@@ -94,13 +94,13 @@ services:
     image: linuxserver/calibre-web:0.6.19
     container_name: calibre
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.calibre.rule=Host(`3f11e0e7d95a11095e4c54ce5515e60b.fae.sh`)"
-      - "traefik.http.routers.calibre.entrypoints=websecure"
-      - "traefik.http.routers.calibre.tls=true"
-      - "traefik.http.routers.calibre.tls.certresolver=le"
-      - "traefik.http.services.calibre.loadbalancer.server.port=8083"
-      - "traefik.port=8083"
+      traefik.enable: true
+      traefik.http.routers.calibre.rule: Host(`3f11e0e7d95a11095e4c54ce5515e60b.fae.sh`)
+      traefik.http.routers.calibre.entrypoints: websecure
+      traefik.http.routers.calibre.tls: true
+      traefik.http.routers.calibre.tls.certresolver: letsencrypt
+      traefik.http.services.calibre.loadbalancer.server.port: 8083
+      traefik.port: 8083
     environment:
       - PUID=1000
       - PGID=1000
