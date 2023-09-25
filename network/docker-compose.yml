@@ -13,56 +13,19 @@ services:
   traefik:
     image: traefik:v2.8
     container_name: "traefik"
-    command:
-      - "--api.insecure=true" 
-      - "--providers.docker"
-      - "--providers.docker.exposedByDefault=false"
-      - "--providers.docker.network=traefik_web"
-
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.websecure.http.tls.certResolver=le"
-      - "--serverstransport.insecureskipverify=true"
-
-      - "--entrypoints.web.forwardedHeaders.insecure=true"
-      - "--entryPoints.web.forwardedHeaders.trustedIPs=127.0.0.1/32,172.23.0.1"
-      - "--entrypoints.websecure.forwardedHeaders.insecure=true"
-      - "--entryPoints.websecure.forwardedHeaders.trustedIPs=127.0.0.1/32,172.23.0.1"
-      
-      - "--certificatesresolvers.le.acme.tlschallenge=true"
-      - "--certificatesresolvers.le.acme.email=kai@fae.sh"
-      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
-
-      - "--entrypoints.tcp.address=:9090"
-
-      - "--experimental.plugins.traefik-real-ip.modulename=github.com/soulbalz/traefik-real-ip"
-      - "--experimental.plugins.traefik-real-ip.version=v1.0.3"
     labels:
-      - "traefik.enable=true"
-      - "traefik.port=8080"
-      - "traefik.http.middlewares.admin-auth.basicauth.users=kazuto:$$2y$$10$$kZJcpW4wVIdkJzWGfHQLGu.r1MZef6bb98f/RRW9ANHN.G9zPkZuO"
-      - "traefik.http.routers.traefik.rule=Host(`24611ab636a8abe2c574218526bbb40c.fae.sh`)"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
-      - "traefik.http.routers.traefik.tls=true"
-      - "traefik.http.routers.traefik.tls.certresolver=le"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      # - "traefik.http.routers.traefik.middlewares=admin-auth@docker"
+      traefik.enable: true
+      traefik.http.routers.traefik.rule: Host(`traefik.fae.sh`) # Define the subdomain for the traefik dashboard.
+      traefik.http.routers.traefik.entrypoints: websecure       # Set the Traefik entry point.
+      traefik.http.routers.api.service: api@internal            # Enable Traefik API.
+      # traefik.http.middlewares.admin-auth.basicauth.users: kazuto:$$2y$$10$$kZJcpW4wVIdkJzWGfHQLGu.r1MZef6bb98f/RRW9ANHN.G9zPkZuO
+      # traefik.http.routers.traefik.middlewares: admin-auth@docker
     ports:
-      - target: 80
-        published: 80
-        mode: host
-      - target: 443
-        published: 443
-        mode: host
-      - target: 9090
-        published: 9090
-        mode: host
-      - target: 8080
-        published: 8080
-        mode: host
+      - 80:80
+      - 443:443
+      - 8080:8080
     volumes:
+      - /f/docker/compose/network/:/etc/traefik/
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /f/docker/data/letsencrypt/:/letsencrypt
     networks:
@@ -76,13 +39,13 @@ services:
       TZ: 'Europe/Berlin'
       WEBPASSWORD: HE%&A%6WQ&x4
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.pihole.rule=Host(`f2482f7878ecee30c686f1c5ee09d76e.fae.sh`)"
-      - "traefik.http.routers.pihole.entrypoints=websecure"
-      - "traefik.http.routers.pihole.tls=true"
-      - "traefik.http.routers.pihole.tls.certresolver=le"
-      - "traefik.http.services.pihole.loadbalancer.server.port=80"
-      - "traefik.port=80"
+      traefik.enable: true
+      traefik.http.routers.pihole.rule: Host(`f2482f7878ecee30c686f1c5ee09d76e.fae.sh`)
+      traefik.http.routers.pihole.entrypoints: websecure
+      traefik.http.routers.pihole.tls: true
+      traefik.http.routers.pihole.tls.certresolver: letsencrypt
+      traefik.http.services.pihole.loadbalancer.server.port: 80
+      traefik.port: 80
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -100,13 +63,13 @@ services:
     environment:
       TZ: 'Europe/Berlin'
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.portainer.rule=Host(`80d0dd0e0b023e6f976d188c53351968.fae.sh`)"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
-      - "traefik.http.routers.portainer.tls=true"
-      - "traefik.http.routers.portainer.tls.certresolver=le"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "traefik.port=9000"
+      traefik.enable: true
+      traefik.http.routers.portainer.rule: Host(`80d0dd0e0b023e6f976d188c53351968.fae.sh`)
+      traefik.http.routers.portainer.entrypoints: websecure
+      traefik.http.routers.portainer.tls: true
+      traefik.http.routers.portainer.tls.certresolver: letsencrypt
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
+      traefik.port: 9000
     ports:
       - 8000:8000
       - 9000:9000
@@ -125,13 +88,13 @@ services:
       - 8082:80
       - 4434:443
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.heimdall.rule=Host(`3594131de4c77a189a6ac09d15ef828a.fae.sh`) || Host(`heimdall.fae.sh`)"
-      - "traefik.http.routers.heimdall.entrypoints=websecure"
-      - "traefik.http.routers.heimdall.tls=true"
-      - "traefik.http.routers.heimdall.tls.certresolver=le"
-      - "traefik.http.services.heimdall.loadbalancer.server.port=80"
-      - "traefik.port=80"
+      traefik.enable: true
+      traefik.http.routers.heimdall.rule: Host(`3594131de4c77a189a6ac09d15ef828a.fae.sh`) || Host(`heimdall.fae.sh`)
+      traefik.http.routers.heimdall.entrypoints: websecure
+      traefik.http.routers.heimdall.tls: true
+      traefik.http.routers.heimdall.tls.certresolver: letsencrypt
+      traefik.http.services.heimdall.loadbalancer.server.port: 80
+      traefik.port: 80
     volumes:
       - /f/docker/data/heimdall:/config
     networks:
@@ -144,13 +107,13 @@ services:
     ports:
       - 8083:80
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vaultwarden.rule=Host(`6e48d67113cb48e9767902313f73cea5.fae.sh`) || Host(`warden.fae.sh`)"
-      - "traefik.http.routers.vaultwarden.entrypoints=websecure"
-      - "traefik.http.routers.vaultwarden.tls=true"
-      - "traefik.http.routers.vaultwarden.tls.certresolver=le"
-      - "traefik.http.services.vaultwarden.loadbalancer.server.port=80"
-      - "traefik.port=80"
+      traefik.enable: true
+      traefik.http.routers.vaultwarden.rule: Host(`6e48d67113cb48e9767902313f73cea5.fae.sh`) || Host(`warden.fae.sh`)
+      traefik.http.routers.vaultwarden.entrypoints: websecure
+      traefik.http.routers.vaultwarden.tls: true
+      traefik.http.routers.vaultwarden.tls.certresolver: letsencrypt
+      traefik.http.services.vaultwarden.loadbalancer.server.port: 80
+      traefik.port: 80
     volumes:
       - /f/docker/data/vaultwarden:/data/
     networks:
@@ -160,3 +123,7 @@ services:
 networks:
   web:
     name: traefik_web
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24
