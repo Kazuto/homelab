@@ -24,7 +24,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - /f/homelab/postgres:/var/lib/postgresql/data
+      - /f/docker/data/postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
@@ -69,7 +69,7 @@ services:
       - postgres
       - redis
     volumes:
-      - /f/homelab/nextcloud:/var/www/html
+      - /f/docker/data/nextcloud:/var/www/html
     environment:
       - REDIS_HOST=redis
     networks:

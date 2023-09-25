@@ -22,8 +22,8 @@ services:
     ports:
       - 25565:25565
     volumes:
-      - '/f/homelab/minecraft/atm7sky:/data'
-      - '/f/homelab/minecraft/modpacks:/modpacks'
+      - '/f/docker/data/minecraft/atm7sky:/data'
+      - '/f/docker/data/minecraft/modpacks:/modpacks'
     tty: true
     stdin_open: true
     networks:

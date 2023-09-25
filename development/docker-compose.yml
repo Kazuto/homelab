@@ -15,8 +15,8 @@ services:
       - "traefik.http.services.code.loadbalancer.server.port=8443"
       - "traefik.port=8443"
     volumes:
-      - /f/homelab/code/config:/config
-      - /f/homelab/emby/themes:/config/workspace/emby-themes
+      - /f/docker/data/code/config:/config
+      - /f/docker/data/emby/themes:/config/workspace/emby-themes
     environment:
       - SUDO_PASSWORD=password # If this optional variable is set, user will have sudo access in the code-server terminal with the specified password.
       - TZ=Europe/Berlin # Specify a timezone to use EG Europe/London

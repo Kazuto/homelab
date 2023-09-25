@@ -64,7 +64,7 @@ services:
         mode: host
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /f/homelab/letsencrypt/:/letsencrypt
+      - /f/docker/data/letsencrypt/:/letsencrypt
     networks:
       - web
     restart: unless-stopped
@@ -88,8 +88,8 @@ services:
       - "53:53/udp"
       - "1337:80/tcp"
     volumes:
-      - '/f/homelab/pihole/pihole:/etc/pihole'
-      - '/f/homelab/pihole/dnsmasq:/etc/dnsmasq.d'    
+      - '/f/docker/data/pihole/pihole:/etc/pihole'
+      - '/f/docker/data/pihole/dnsmasq:/etc/dnsmasq.d'    
     networks:
       - web
     restart: unless-stopped
@@ -113,7 +113,7 @@ services:
       - 9443:9443
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /f/homelab/portainer/:/data
+      - /f/docker/data/portainer/:/data
     networks:
       - web
     restart: unless-stopped
@@ -133,7 +133,7 @@ services:
       - "traefik.http.services.heimdall.loadbalancer.server.port=80"
       - "traefik.port=80"
     volumes:
-      - /f/homelab/heimdall:/config
+      - /f/docker/data/heimdall:/config
     networks:
       - web
     restart: unless-stopped
@@ -152,7 +152,7 @@ services:
       - "traefik.http.services.vaultwarden.loadbalancer.server.port=80"
       - "traefik.port=80"
     volumes:
-      - /f/homelab/vaultwarden:/data/
+      - /f/docker/data/vaultwarden:/data/
     networks:
       - web
     restart: unless-stopped

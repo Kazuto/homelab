@@ -31,8 +31,8 @@ services:
       - "traefik.port=8096"
       # - "traefik.http.routers.emby.middlewares=basic-auth@docker"
     volumes:
-      - /f/homelab/emby/config:/config
-      - /f/homelab/emby/themes:/system/dashboard-ui/modules/themes
+      - /f/docker/data/emby/config:/config
+      - /f/docker/data/emby/themes:/system/dashboard-ui/modules/themes
       - /f/backup/emby:/mnt/backup # Backup directory
       - /d/movies:/mnt/movies # Media directory
       - /e/shows:/mnt/shows # Media directory
@@ -61,10 +61,10 @@ services:
     ports:
       - 8989:8989
     volumes:
-      - '/f/homelab/sonarr/data:/config'
+      - '/f/docker/data/sonarr/data:/config'
       - '/e/shows/:/tv'
       - '/e/anime/:/anime'
-      - '/f/homelab/sonarr/downloadclient-downloads:/downloads'
+      - '/f/docker/data/sonarr/downloadclient-downloads:/downloads'
     networks:
       - web
     restart: unless-stopped
@@ -83,7 +83,7 @@ services:
     ports:
       - 8888:8888
     volumes:
-      - '/f/homelab/sabnzbd:/datadir'
+      - '/f/docker/data/sabnzbd:/datadir'
       - '/f/downloads:/media'
     networks:
       - web
@@ -110,7 +110,7 @@ services:
     ports:
       - 8084:8083
     volumes:
-      - '/f/homelab/calibre/config:/config'
+      - '/f/docker/data/calibre/config:/config'
       - '/f/_shared/library:/books'
     networks:
       - web
