@@ -1,23 +1,6 @@
 version: '2'
 
 services:
-  mariadb:
-    container_name: mariadb
-    image: mariadb:10.5
-    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
-    ports:
-      - 3306:3306
-    volumes:
-      - /f/homelab/mariadb:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=HE%&A%6WQ&x4
-      - MYSQL_PASSWORD=Qc5QEcpY
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-    networks:
-      - web
-    restart: unless-stopped
-
   postgres:
     container_name: postgres
     image: postgres:15.1
@@ -28,7 +11,7 @@ services:
     environment:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=nextcloud
-      - POSTGRES_PASSWORD=HE%&A%6WQ&x4
+      - POSTGRES_PASSWORD=@A25D6n#N^&fe#agGG47s5!i
     networks:
       - web
     restart: unless-stopped
@@ -44,12 +27,12 @@ services:
 
   nextcloud:
     container_name: nextcloud
-    image: nextcloud:25.0.3
+    image: nextcloud:27.1.1
     deploy:
       resources:
         reservations:
-          cpus: '1'
-          memory: 4G
+          cpus: '2'
+          memory: 8G
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nextcloud.rule=Host(`5f40b17473d19a3d763ad2925b4c6014.fae.sh`) || Host(`cloud.fae.sh`)"
@@ -58,20 +41,31 @@ services:
       - "traefik.http.routers.nextcloud.tls.certresolver=le"
       - "traefik.http.services.nextcloud.loadbalancer.server.port=80"
       - "traefik.port=80"
-      - "traefik.http.routers.nextcloud.middlewares=nextcloud_redirectregex"
-      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.permanent=true"
-      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.regex=https://(.*)/.well-known/(?:card|cal)dav"
-      - "traefik.http.middlewares.nextcloud_redirectregex.redirectregex.replacement=https://$${1}/remote.php/dav"
+      - "traefik.http.middlewares.nextcloud_redirect.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloud_redirect.redirectregex.regex=https://(.*)/.well-known/(?:card|cal)dav"
+      - "traefik.http.middlewares.nextcloud_redirect.redirectregex.replacement=https://$${1}/remote.php/dav"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.accessControlMaxAge=100"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.hostsProxyHeaders=X-Forwarded-Host"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.sslRedirect=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.stsSeconds=63072000"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.stsPreload=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.browserXssFilter=true"
+      - "traefik.http.middlewares.nextcloud_secure_headers.headers.referrerPolicy=same-origin"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud_redirect,nextcloud_secure_headers"
     ports:
       - 8081:80
     links:
-      - mariadb
       - postgres
       - redis
     volumes:
       - /f/docker/data/nextcloud:/var/www/html
     environment:
       - REDIS_HOST=redis
+      - TRUSTED_PROXIES=192.168.90.0/24
     networks:
       - web
       - nextcloud
