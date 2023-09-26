@@ -1,0 +1,17 @@
+version: '3'
+services:
+  auth:
+    container_name: auth    
+    image: authelia/authelia:latest
+    volumes:
+      - ${DOCKER_DATA_DIR}/authelia:/config
+    labels:
+      traefik.enable: true
+      traefik.http.routers.auth.entryPoints: websecure
+    networks:
+      - web
+    restart: unless-stopped
+    
+networks:
+  web:
+    name: traefik_web
