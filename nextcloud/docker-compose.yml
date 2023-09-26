@@ -1,30 +1,6 @@
 version: '2'
 
 services:
-  postgres:
-    container_name: postgres
-    image: postgres:15.1
-    ports:
-      - 5432:5432
-    volumes:
-      - /f/docker/data/postgres:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=nextcloud
-      - POSTGRES_USER=nextcloud
-      - POSTGRES_PASSWORD=@A25D6n#N^&fe#agGG47s5!i
-    networks:
-      - web
-    restart: unless-stopped
-
-  redis:
-    container_name: redis
-    image: redis:7.0.8
-    ports:
-      - 6379:6379
-    networks:
-      - web
-    restart: unless-stopped
-
   nextcloud:
     container_name: nextcloud
     image: nextcloud:27.1.1
@@ -35,7 +11,7 @@ services:
           memory: 8G
     labels:
       traefik.enable: true
-      traefik.http.routers.nextcloud.rule: Host(`5f40b17473d19a3d763ad2925b4c6014.fae.sh`) || Host(`cloud.fae.sh`)
+      traefik.http.routers.nextcloud.rule: Host(`cloud.${DOMAIN}`)
       traefik.http.routers.nextcloud.entrypoints: websecure
       traefik.http.routers.nextcloud.tls: true
       traefik.http.routers.nextcloud.tls.certresolver: letsencrypt
@@ -51,7 +27,7 @@ services:
       - postgres
       - redis
     volumes:
-      - /f/docker/data/nextcloud:/var/www/html
+      - ${DOCKER_DATA_DIR}/nextcloud:/var/www/html
     environment:
       - REDIS_HOST=redis
       - TRUSTED_PROXIES=192.168.90.0/24

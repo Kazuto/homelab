@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    volumes:
+      - ${DOCKER_DATA_DIR}/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=faelab
+      - POSTGRES_PASSWORD=Tjx8D8LvTWQoz2T9t6tUN98Y
+    networks:
+      - web
+    restart: unless-stopped
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
