@@ -2,13 +2,13 @@ version: "3.3"
 
 services:
   emby:
-    image: emby/embyserver:4.8.0.21
+    image: emby/embyserver:latest
     container_name: emby
     #runtime: nvidia # Expose NVIDIA GPUs
     #network_mode: host # Enable DLNA and Wake-on-Lan
     ports:
-      - 8096:8096 # HTTP port
-      - 8920:8920 # HTTPS port
+      - ${EMBY_HTTP_PORT}:8096 # HTTP port
+      - ${EMBY_HTTPS_PORT}:8920 # HTTPS port
     deploy:
       resources:
         limits:
@@ -23,7 +23,7 @@ services:
               capabilities: [gpu]
     labels:
       traefik.enable: true
-      traefik.http.routers.emby.rule: Host(`7428b493ccb3325b73789e686db40bf3.fae.sh`) || Host(`emby.fae.sh`)
+      traefik.http.routers.emby.rule: Host(`7428b493ccb3325b73789e686db40bf3.${DOMAIN}`) || Host(`emby.${DOMAIN}`)
       traefik.http.routers.emby.entrypoints: websecure
       traefik.http.routers.emby.tls: true
       traefik.http.routers.emby.tls.certresolver: letsencrypt
@@ -31,8 +31,8 @@ services:
       traefik.port: 8096
       # traefik.http.routers.emby.middlewares=basic-auth@docker"
     volumes:
-      - /f/docker/data/emby/config:/config
-      - /f/docker/data/emby/themes:/system/dashboard-ui/modules/themes
+      - ${DOCKER_DATA_DIR}/emby/config:/config
+      - ${DOCKER_DATA_DIR}/emby/themes:/system/dashboard-ui/modules/themes
       - /f/backup/emby:/mnt/backup # Backup directory
       - /d/movies:/mnt/movies # Media directory
       - /e/shows:/mnt/shows # Media directory
@@ -46,71 +46,76 @@ services:
     restart: unless-stopped
     
   sonarr:
-    image: linuxserver/sonarr:3.0.9
+    image: linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      TZ: 'Europe/Berlin'
+      TZ: ${TZ}
     labels:
       traefik.enable: true
-      traefik.http.routers.sonarr.rule: Host(`9ddb2697ec3311eedd470d790104b4a7.fae.sh`)
+      traefik.http.routers.sonarr.rule: Host(`9ddb2697ec3311eedd470d790104b4a7.${DOMAIN}`)
       traefik.http.routers.sonarr.entrypoints: websecure
       traefik.http.routers.sonarr.tls: true
       traefik.http.routers.sonarr.tls.certresolver: letsencrypt
       traefik.http.services.sonarr.loadbalancer.server.port: 8989
       traefik.port: 8989
     ports:
-      - 8989:8989
+      - ${SONARR_HTTP_PORT}:8989
     volumes:
-      - '/f/docker/data/sonarr/data:/config'
+      - '${DOCKER_DATA_DIR}/sonarr/data:/config'
       - '/e/shows/:/tv'
       - '/e/anime/:/anime'
-      - '/f/docker/data/sonarr/downloadclient-downloads:/downloads'
+      - '${DOCKER_DATA_DIR}/sonarr/downloadclient-downloads:/downloads'
     networks:
       - web
     restart: unless-stopped
 
   sabnzbd:
-    image: sabnzbd/sabnzbd:3.2.1
+    image: linuxserver/sabnzbd:latest
     container_name: sabnzbd
     labels:
       traefik.enable: true
-      traefik.http.routers.sabnzbd.rule: Host(`c22c230d554fcdde10136d735191c304.fae.sh`)
+      traefik.http.routers.sabnzbd.rule: Host(`c22c230d554fcdde10136d735191c304.${DOMAIN}`) || Host(`nzb.${DOMAIN}`)
       traefik.http.routers.sabnzbd.entrypoints: websecure
       traefik.http.routers.sabnzbd.tls: true
       traefik.http.routers.sabnzbd.tls.certresolver: letsencrypt
-      traefik.http.services.sabnzbd.loadbalancer.server.port: 8888
-      traefik.port: 8888
+      traefik.http.services.sabnzbd.loadbalancer.server.port: 8080
+      traefik.port: 8080
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     ports:
-      - 8888:8888
+      - ${SABNZBD_HTTP_PORT}:8080
     volumes:
-      - '/f/docker/data/sabnzbd:/datadir'
-      - '/f/downloads:/media'
+      - ${DOCKER_DATA_DIR}/sabnzbd:/config
+      # - '${DOCKER_DATA_DIR}/sabnzbd:/datadir'
+      - '/f/downloads:/Downloads'
     networks:
       - web
     restart: unless-stopped
 
   calibre:
     # image: linuxserver/calibre:6.13.0
-    image: linuxserver/calibre-web:0.6.19
+    image: linuxserver/calibre-web:latest
     container_name: calibre
     labels:
       traefik.enable: true
-      traefik.http.routers.calibre.rule: Host(`3f11e0e7d95a11095e4c54ce5515e60b.fae.sh`)
+      traefik.http.routers.calibre.rule: Host(`3f11e0e7d95a11095e4c54ce5515e60b.${DOMAIN}`)
       traefik.http.routers.calibre.entrypoints: websecure
       traefik.http.routers.calibre.tls: true
       traefik.http.routers.calibre.tls.certresolver: letsencrypt
       traefik.http.services.calibre.loadbalancer.server.port: 8083
       traefik.port: 8083
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Berlin
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - DOCKER_MODS=linuxserver/mods:universal-calibre #optional
       - OAUTHLIB_RELAX_TOKEN_SCOPE=1
     ports:
-      - 8084:8083
+      - ${CALIBRE_HTTP_PORT}:8083
     volumes:
-      - '/f/docker/data/calibre/config:/config'
+      - '${DOCKER_DATA_DIR}/calibre/config:/config'
       - '/f/_shared/library:/books'
     networks:
       - web

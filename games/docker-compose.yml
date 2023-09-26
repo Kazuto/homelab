@@ -13,14 +13,14 @@ services:
       #FTB_MODPACK_VERSION_ID: 2239
     labels:
       traefik.enable: true
-      traefik.tcp.routers.minecraft.rule: HostSNI(`mc.fae.sh`)
+      traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
       traefik.tcp.routers.minecraft.entrypoints: tcp
       traefik.port: 25565
     ports:
       - 25565:25565
     volumes:
-      - '/f/docker/data/minecraft/atm7sky:/data'
-      - '/f/docker/data/minecraft/modpacks:/modpacks'
+      - '${DOCKER_DATA_DIR}/minecraft/atm7sky:/data'
+      - '${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks'
     tty: true
     stdin_open: true
     networks:

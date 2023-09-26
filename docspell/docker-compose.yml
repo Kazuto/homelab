@@ -25,7 +25,7 @@ services:
     ports:
       - "7880:7880"
     environment:
-      - TZ=Europe/Berlin
+      - TZ=${TZ}
       - DOCSPELL_SERVER_INTERNAL__URL=http://docspell-restserver:7880
       - DOCSPELL_SERVER_ADMIN__ENDPOINT_SECRET=HE%&A%6WQ&x4
       - DOCSPELL_SERVER_AUTH_SERVER__SECRET=82521451fcf32d0d30a43e2a7468d604
@@ -43,7 +43,7 @@ services:
       - DOCSPELL_SERVER_BACKEND_ADDONS_ENABLED=false
     labels:
       traefik.enable: true
-      traefik.http.routers.restserver.rule: Host(`docspell.fae.sh`)
+      traefik.http.routers.restserver.rule: Host(`docspell.${DOMAIN}`)
       traefik.http.routers.restserver.entrypoints: websecure
       traefik.http.routers.restserver.tls: true
       traefik.http.routers.restserver.tls.certresolver: letsencrypt
@@ -65,7 +65,7 @@ services:
     #   - -J-Xmx3G
     restart: unless-stopped
     environment:
-      - TZ=Europe/Berlin
+      - TZ=${TZ}
       - DOCSPELL_JOEX_APP__ID=joex1
       - DOCSPELL_JOEX_PERIODIC__SCHEDULER_NAME=joex1
       - DOCSPELL_JOEX_SCHEDULER_NAME=joex1
@@ -128,7 +128,7 @@ services:
     container_name: postgres_db
     restart: unless-stopped
     volumes:
-      - /f/docker/data/docspell/postgres:/var/lib/postgresql/data/
+      - ${DOCKER_DATA_DIR}/docspell/postgres:/var/lib/postgresql/data/
     networks:
       - docspell
     environment:
@@ -141,7 +141,7 @@ services:
     container_name: docspell-solr
     restart: unless-stopped
     volumes:
-      - /f/docker/data/docspell/solr:/var/solr
+      - ${DOCKER_DATA_DIR}/docspell/solr:/var/solr
     networks:
       - docspell
     command:
