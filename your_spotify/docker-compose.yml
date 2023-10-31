@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  spotify:
+    image: lscr.io/linuxserver/your_spotify:latest
+    container_name: spotify
+    ports:
+      - ${SPOTIFY_HTTP_PORT}:80 # HTTP port
+      - ${SPOTIFY_HTTPS_PORT}:443 # HTTPS port
+    labels:
+      traefik.enable: true
+      traefik.http.routers.spotify.entrypoints: websecure
+      traefik.http.routers.spotify.tls: true
+      traefik.http.routers.spotify.tls.certresolver: letsencrypt
+      traefik.http.services.spotify.loadbalancer.server.port: 80
+      traefik.port: 80
+    networks:
+      - web
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - APP_URL=https://spotify.${DOMAIN}
+      - MONGO_ENDPOINT=mongodb://admin:VBjgWx56U3QpiJtQ6U342P9k@mongodb.fae.sh
+      - SPOTIFY_PUBLIC=0d0e4428516348db8f088a4309f656d9
+      - SPOTIFY_SECRET=29300dfa852e4f89aaac3c507c387a62
+      - CORS=all
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

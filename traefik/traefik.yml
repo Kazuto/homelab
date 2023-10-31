@@ -55,6 +55,9 @@ entrypoints:
       middlewares:
         - securityHeaders@file
 
+  tcp: 
+    address: :9090
+
 providers: 
   providersThrottleDuration: 2s
 

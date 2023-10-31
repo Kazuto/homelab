@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    #runtime: nvidia # Expose NVIDIA GPUs
+    #network_mode: host # Enable DLNA and Wake-on-Lan
+    ports:
+      - ${JELLYFIN_HTTP_PORT}:8096 # HTTP port
+      - ${JELLYFIN_HTTPS_PORT}:8920 # HTTPS port
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6G
+        reservations:
+          cpus: '1'
+          memory: 4G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jellyfin.rule: Host(`jelly.${DOMAIN}`)
+      traefik.http.routers.jellyfin.entrypoints: websecure
+      traefik.http.routers.jellyfin.tls: true
+      traefik.http.routers.jellyfin.tls.certresolver: letsencrypt
+      traefik.http.services.jellyfin.loadbalancer.server.port: 8096
+      traefik.port: 8096
+    volumes:
+      - ${DOCKER_DATA_DIR}/jellyfin/config:/config
+      - ${DOCKER_DATA_DIR}/jellyfin/cache:/cache
+      - /f/backup/jellyfin:/mnt/backup # Backup directory
+      - /d/movies:/mnt/movies # Media directory
+      - /e/shows:/mnt/shows # Media directory
+      - /e/anime:/mnt/anime # Media directory
+      - /e/audio_books:/mnt/audio_books # Media directory
+    #devices:
+    #  - /dev/dri:/dev/dri # VAAPI/NVDEC/NVENC render nodes
+    #  - /dev/vchiq:/dev/vchiq # MMAL/OMX on Raspberry Pi
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

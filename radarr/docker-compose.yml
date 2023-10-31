@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.radarr.entrypoints: websecure
+      traefik.http.routers.radarr.tls: true
+      traefik.http.routers.radarr.tls.certresolver: letsencrypt
+      traefik.http.services.radarr.loadbalancer.server.port: 7878
+      traefik.port: 7878
+    ports:
+      - ${RADARR_HTTP_PORT}:7878
+    volumes:
+      - '${DOCKER_DATA_DIR}/radarr/data:/config'
+      - '/d/movies/:/movies'
+      - '/f/downloads/complete:/downloads/complete'
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

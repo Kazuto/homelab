@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  pihole:
+    image: pihole/pihole:2022.07.1
+    container_name: pihole
+    environment:
+      TZ: ${TZ}
+      WEBPASSWORD: HE%&A%6WQ&x4
+    labels:
+      traefik.enable: true
+      traefik.http.routers.pihole.rule: Host(`f2482f7878ecee30c686f1c5ee09d76e.${DOMAIN}`)
+      traefik.http.routers.pihole.entrypoints: websecure
+      traefik.http.routers.pihole.tls: true
+      traefik.http.routers.pihole.tls.certresolver: letsencrypt
+      traefik.http.services.pihole.loadbalancer.server.port: 80
+      traefik.port: 80
+    ports:
+      - "${PI_HOLE_DNS_PORT}:53/tcp"
+      - "${PI_HOLE_DNS_PORT}:53/udp"
+      - "${PI_HOLE_HTTPS_PORT}:80/tcp"
+    volumes:
+      - ${DOCKER_DATA_DIR}/pihole/pihole:/etc/pihole
+      - ${DOCKER_DATA_DIR}/pihole/dnsmasq:/etc/dnsmasq.d
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24

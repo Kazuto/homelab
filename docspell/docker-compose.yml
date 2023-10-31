@@ -1,6 +1,6 @@
-version: '3.8'
-services:
+version: "3"
 
+services:
   # The restserver and joex containers defined here are configured
   # using env variables. Both must connect to the same database and
   # solr instance. More information on configuring can be found here:

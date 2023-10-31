@@ -1,0 +1,11 @@
+version: "3"
+
+services:
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:latest
+    container_name: "cloudflare-ddns"
+    environment:
+      - API_KEY=AskVh21xlQsQWDh_VpkqDTANWfHlW72lJEVYnHPP
+      - ZONE=${DOMAIN}
+      - CRON=*/5 * * * *
+    restart: unless-stopped

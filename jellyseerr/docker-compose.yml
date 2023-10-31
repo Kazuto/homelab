@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - JELLYFIN_TYPE=emby
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jellyseerr.entrypoints: websecure
+      traefik.http.routers.jellyseerr.tls: true
+      traefik.http.routers.jellyseerr.tls.certresolver: letsencrypt
+      traefik.http.services.jellyseerr.loadbalancer.server.port: 5055
+      traefik.port: 5055
+    ports:
+      - ${JELLYSEERR_HTTP_PORT}:5055
+    volumes:
+      - '${DOCKER_DATA_DIR}/jellyseerr/config:/app/config'
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

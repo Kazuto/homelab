@@ -1,0 +1,26 @@
+version: "3"
+
+services:
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
+    ports:
+      - ${HOMARR_HTTP_PORT}:7575
+    labels:
+      traefik.enable: true
+      traefik.http.routers.homarr.entrypoints: websecure
+      traefik.http.routers.homarr.tls: true
+      traefik.http.routers.homarr.tls.certresolver: letsencrypt
+      traefik.http.services.homarr.loadbalancer.server.port: 7575
+      traefik.port: 7575
+    volumes:
+      - ${DOCKER_DATA_DIR}/homarr/configs:/app/data/configs
+      - ${DOCKER_DATA_DIR}/homarr/icons:/app/public/icons
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

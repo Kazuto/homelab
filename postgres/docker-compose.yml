@@ -1,26 +1,24 @@
-version: '3'
+version: "3"
 
 services:
   postgres:
     container_name: postgres
     image: postgres:latest
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.postgres.rule: HostSNI(`postgres.${DOMAIN}`)
+      traefik.tcp.routers.postgres.entrypoints: tcp
+      traefik.tcp.routers.postgres.tls: true
+      traefik.tcp.routers.postgres.tls.certresolver: letsencrypt
+      traefik.port: 5432
     ports:
-      - 5432:5432
+      - ${POSTGRES_TCP_PORT}:5432
     volumes:
       - ${DOCKER_DATA_DIR}/postgres:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=nextcloud
       - POSTGRES_USER=faelab
       - POSTGRES_PASSWORD=Tjx8D8LvTWQoz2T9t6tUN98Y
-    networks:
-      - web
-    restart: unless-stopped
-
-  redis:
-    container_name: redis
-    image: redis:latest
-    ports:
-      - 6379:6379
     networks:
       - web
     restart: unless-stopped

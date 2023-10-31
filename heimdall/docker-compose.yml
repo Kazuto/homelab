@@ -1,0 +1,25 @@
+version: "3"
+
+services:
+  heimdall:
+    image: linuxserver/heimdall:latest
+    container_name: heimdall
+    ports:
+      - ${HEIMDALL_HTTP_PORT}:80
+      - ${HEIMDALL_HTTPS_PORT}:443
+    labels:
+      traefik.enable: true
+      traefik.http.routers.heimdall.entrypoints: websecure
+      traefik.http.routers.heimdall.tls: true
+      traefik.http.routers.heimdall.tls.certresolver: letsencrypt
+      traefik.http.services.heimdall.loadbalancer.server.port: 80
+      traefik.port: 80
+    volumes:
+      - ${DOCKER_DATA_DIR}/heimdall:/config
+    networks:
+      - web
+    restart: unless-stopped
+ 
+networks:
+  web:
+    name: traefik_web

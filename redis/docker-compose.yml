@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.redis.rule: HostSNI(`redis.${DOMAIN}`)
+      traefik.tcp.routers.redis.entrypoints: tcp
+      traefik.tcp.routers.redis.tls: true
+      traefik.tcp.routers.redis.tls.certresolver: letsencrypt
+      traefik.port: 6379
+    ports:
+      - ${REDIS_TCP_PORT}:6379
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

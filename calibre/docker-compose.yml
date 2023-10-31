@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  calibre:
+    # image: linuxserver/calibre:6.13.0
+    image: linuxserver/calibre-web:latest
+    container_name: calibre
+    labels:
+      traefik.enable: true
+      traefik.http.routers.calibre.rule: Host(`3f11e0e7d95a11095e4c54ce5515e60b.${DOMAIN}`)
+      traefik.http.routers.calibre.entrypoints: websecure
+      traefik.http.routers.calibre.tls: true
+      traefik.http.routers.calibre.tls.certresolver: letsencrypt
+      traefik.http.services.calibre.loadbalancer.server.port: 8083
+      traefik.port: 8083
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DOCKER_MODS=linuxserver/mods:universal-calibre #optional
+      - OAUTHLIB_RELAX_TOKEN_SCOPE=1
+    ports:
+      - ${CALIBRE_HTTP_PORT}:8083
+    volumes:
+      - '${DOCKER_DATA_DIR}/calibre/config:/config'
+      - '/f/_shared/library:/books'
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

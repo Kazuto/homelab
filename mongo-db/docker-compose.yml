@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.mongodb.rule: HostSNI(`mongodb.${DOMAIN}`)
+      traefik.tcp.routers.mongodb.entrypoints: tcp
+      traefik.tcp.routers.mongodb.tls: true
+      traefik.tcp.routers.mongodb.tls.certresolver: letsencrypt
+      traefik.tcp.services.mongodb.loadbalancer.server.port: 27017
+      traefik.port: 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - ${DOCKER_DATA_DIR}/mongodb:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: VBjgWx56U3QpiJtQ6U342P9k
+    networks:
+      - web
+    restart: unless-stopped
+
+  mongo-express:
+    container_name: mongo-express
+    image: mongo-express
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    labels:
+      traefik.enable: true
+      traefik.http.routers.mongo-express.entrypoints: websecure
+      traefik.http.routers.mongo-express.tls: true
+      traefik.http.routers.mongo-express.tls.certresolver: letsencrypt
+      traefik.http.services.mongo-express.loadbalancer.server.port: 80
+      traefik.port: 80
+    ports:
+      - ${MONGO_EXPRESS_HTTP_PORT}:8081 # HTTP port
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: VBjgWx56U3QpiJtQ6U342P9k
+      ME_CONFIG_MONGODB_URL: mongodb://admin:VBjgWx56U3QpiJtQ6U342P9k@mongodb.fae.sh
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web

@@ -1,4 +1,4 @@
-version: "3.3"
+version: "3"
 
 services:
   code:
@@ -19,9 +19,9 @@ services:
       - ${DOCKER_DATA_DIR}/emby/themes:/config/workspace/emby-themes
     environment:
       - SUDO_PASSWORD=password # If this optional variable is set, user will have sudo access in the code-server terminal with the specified password.
-      - TZ=${TZ} # Specify a timezone to use EG Europe/London
-      - PUID=${PUID} # for UserID
-      - PGID=${PGID} # for GroupID
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
       - PASSWORD=password # Optional web gui password, if not provided, there will be no auth.
     networks:
       - web

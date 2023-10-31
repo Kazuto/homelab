@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  traefik:
+    image: traefik:v2.8
+    container_name: "traefik"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.traefik.entrypoints: websecure       # Set the Traefik entry point.
+      traefik.http.routers.api.service: api@internal            # Enable Traefik API.
+      traefik.http.services.nextcloud.loadbalancer.server.port: 8080
+      traefik.port: 8080
+      # traefik.http.middlewares.admin-auth.basicauth.users: kazuto:$$2y$$10$$kZJcpW4wVIdkJzWGfHQLGu.r1MZef6bb98f/RRW9ANHN.G9zPkZuO
+      # traefik.http.routers.traefik.middlewares: admin-auth@docker
+    environment:
+      - DOMAIN=${DOMAIN}
+    ports:
+      - ${TRAEFIK_HTTP_PORT}:80
+      - ${TRAEFIK_HTTPS_PORT}:443
+      - ${TRAEFIK_DASHBOARD_PORT}:8080
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/traefik/:/etc/traefik/
+      - ${DOCKER_DATA_DIR}/letsencrypt/:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.90.0/24

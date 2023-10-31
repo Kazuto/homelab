@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.15.1
+    container_name: portainer
+    environment:
+      TZ: ${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.portainer.entrypoints: websecure
+      traefik.http.routers.portainer.tls: true
+      traefik.http.routers.portainer.tls.certresolver: letsencrypt
+      traefik.http.services.portainer.loadbalancer.server.port: 9000
+      traefik.port: 9000
+    ports:
+      - ${PORTAINER_SSH_PORT}:8000
+      - ${PORTAINER_GUI_PORT}:9000
+    volumes:
+      - ${DOCKER_DATA_DIR}/portainer/:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    driver: bridge
