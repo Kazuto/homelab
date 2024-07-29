@@ -7,7 +7,8 @@ services:
     environment:
       EULA: "TRUE"
       TYPE: "CURSEFORGE"
-      CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
+      CF_SERVER_MOD: "/modpacks/CMA+Server+Files+0.4.2.zip"
+      # CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
       #TYPE: "FTBA"
       #FTB_MODPACK_ID: 95
       #FTB_MODPACK_VERSION_ID: 2239
@@ -17,9 +18,9 @@ services:
       traefik.tcp.routers.minecraft.entrypoints: tcp
       traefik.port: 25565
     ports:
-      - 25565:25565
+      - ${MINECRAFT_TCP_PORT}:25565
     volumes:
-      - '${DOCKER_DATA_DIR}/minecraft/atm7sky:/data'
+      - '${DOCKER_DATA_DIR}/minecraft/cma:/data'
       - '${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks'
     tty: true
     stdin_open: true
@@ -30,3 +31,4 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true

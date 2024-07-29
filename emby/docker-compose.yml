@@ -2,7 +2,7 @@ version: "3"
 
 services:
   emby:
-    image: emby/embyserver:4.8.0.55
+    image: emby/embyserver:4.8.8.0
     container_name: emby
     #runtime: nvidia # Expose NVIDIA GPUs
     #network_mode: host # Enable DLNA and Wake-on-Lan
@@ -27,6 +27,7 @@ services:
       traefik.http.routers.emby.tls: true
       traefik.http.routers.emby.tls.certresolver: letsencrypt
       traefik.http.services.emby.loadbalancer.server.port: 8096
+      traefik.http.middlewares.emby-https-redirect.redirectscheme.scheme: https
       traefik.port: 8096
     volumes:
       - ${DOCKER_DATA_DIR}/emby-4.8/config:/config

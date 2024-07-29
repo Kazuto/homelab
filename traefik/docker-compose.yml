@@ -14,6 +14,7 @@ services:
       # traefik.http.routers.traefik.middlewares: admin-auth@docker
     environment:
       - DOMAIN=${DOMAIN}
+      - CLOUDFLARE_DNS_API_TOKEN=F_0Rp5VdRP-gGEu6H3OQY5xtQHRei5qA-WKUYjVW
     ports:
       - ${TRAEFIK_HTTP_PORT}:80
       - ${TRAEFIK_HTTPS_PORT}:443

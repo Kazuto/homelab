@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  smake:
+    image: pawelmalak/flame:latest
+    container_name: smake
+    ports:
+      - ${SMAKE_FLAME_HTTPS_PORT}:5005
+    labels:
+      traefik.enable: true
+      traefik.http.routers.smake.entrypoints: websecure
+      traefik.http.routers.smake.tls: true
+      traefik.http.routers.smake.tls.certresolver: letsencrypt
+      traefik.http.services.smake.loadbalancer.server.port: 5005
+      traefik.port: 5005
+    volumes:
+      - ${DOCKER_DATA_DIR}/smake_flame/data:/app/data
+    networks:
+      - web
+    environment:
+      - PASSWORD=smake_flame
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

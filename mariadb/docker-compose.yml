@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:latest
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.mariadb.rule: HostSNI(`mariadb.${DOMAIN}`)
+      traefik.tcp.routers.mariadb.entrypoints: tcp
+      traefik.tcp.routers.mariadb.tls: true
+      traefik.tcp.routers.mariadb.tls.certresolver: letsencrypt
+      traefik.port: 3306
+    security_opt: # see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
+      - seccomp:unconfined
+      - apparmor:unconfined
+    command: mariadbd --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+    volumes:
+      - "${DOCKER_DATA_DIR}/mariadb:/var/lib/mysql" # DO NOT REMOVE
+    environment:
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_INITDB_SKIP_TZINFO: "1"
+      MARIADB_DATABASE: "photoprism"
+      MARIADB_USER: "A76u88kqT875"
+      MARIADB_PASSWORD: "6#64@2Yx7WY5Jp6C#4^dN$&&"
+      MARIADB_ROOT_PASSWORD: "6#64@2Yx7WY5Jp6C#4^dN$&&"
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

@@ -1,0 +1,95 @@
+version: "3"
+
+services:
+  photoprism:
+    image: photoprism/photoprism:latest
+    container_name: photoprism
+    depends_on:
+      - mariadb
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      PHOTOPRISM_ADMIN_USER: "kazuto"
+      PHOTOPRISM_ADMIN_PASSWORD: "%8KTq3ntKwffsVw9#8p@#65#"
+      PHOTOPRISM_AUTH_MODE: "password"
+      PHOTOPRISM_SITE_URL: "https://memories.${DOMAIN}/"
+      PHOTOPRISM_DISABLE_TLS: "false"
+      PHOTOPRISM_DEFAULT_TLS: "false"
+      PHOTOPRISM_ORIGINALS_LIMIT: 5000
+      PHOTOPRISM_HTTP_COMPRESSION: "gzip"
+      PHOTOPRISM_LOG_LEVEL: "info"                   # log level: trace, debug, info, warning, error, fatal, or panic
+      PHOTOPRISM_READONLY: "false"                   # do not modify originals directory (reduced functionality)
+      PHOTOPRISM_EXPERIMENTAL: "false"               # enables experimental features
+      PHOTOPRISM_DISABLE_CHOWN: "false"              # disables updating storage permissions via chmod and chown on startup
+      PHOTOPRISM_DISABLE_WEBDAV: "false"             # disables built-in WebDAV server
+      PHOTOPRISM_DISABLE_SETTINGS: "false"           # disables settings UI and API
+      PHOTOPRISM_DISABLE_TENSORFLOW: "false"         # disables all features depending on TensorFlow
+      PHOTOPRISM_DISABLE_FACES: "false"              # disables face detection and recognition (requires TensorFlow)
+      PHOTOPRISM_DISABLE_CLASSIFICATION: "false"     # disables image classification (requires TensorFlow)
+      PHOTOPRISM_DISABLE_VECTORS: "false"            # disables vector graphics support
+      PHOTOPRISM_DISABLE_RAW: "false"                # disables indexing and conversion of RAW images
+      PHOTOPRISM_RAW_PRESETS: "false"                # enables applying user presets when converting RAW images (reduces performance)
+      PHOTOPRISM_JPEG_QUALITY: 85                    # a higher value increases the quality and file size of JPEG images and thumbnails (25-100)
+      # PHOTOPRISM_DETECT_NSFW: "false"              # automatically flags photos as private that MAY be offensive (requires TensorFlow)
+      # PHOTOPRISM_UPLOAD_NSFW: "true"               # allows uploads that MAY be offensive (no effect without TensorFlow)
+      # PHOTOPRISM_DATABASE_DRIVER: "sqlite"
+      PHOTOPRISM_DATABASE_SERVER: "mariadb:3306"
+      PHOTOPRISM_DATABASE_NAME: "photoprism"
+      PHOTOPRISM_DATABASE_USER: "A76u88kqT875"
+      PHOTOPRISM_DATABASE_PASSWORD: "CBUi47Y9z9@h33@2sB9&!3u#" 
+      PHOTOPRISM_SITE_CAPTION: "Mayer's memory place"
+      # PHOTOPRISM_SITE_DESCRIPTION: ""                # meta site description
+      # PHOTOPRISM_SITE_AUTHOR: ""                     # meta site author
+    labels:
+      traefik.enable: true
+      traefik.http.routers.photoprism.rule: Host(`memories.${DOMAIN}`)
+      traefik.http.routers.photoprism.entrypoints: websecure
+      traefik.http.routers.photoprism.tls: true
+      traefik.http.routers.photoprism.tls.certresolver: letsencrypt
+      traefik.http.services.photoprism.loadbalancer.server.port: 2342
+      traefik.port: 2342
+    working_dir: "/photoprism" # do not change or remove
+    ports:
+      - ${PHOTOPRISM_HTTP_PORT}:2342
+    volumes:
+      - "${DOCKER_DATA_DIR}/photoprism/originals:/photoprism/originals"               # Original media files (DO NOT REMOVE)
+      - "${DOCKER_DATA_DIR}/photoprism/storage:/photoprism/storage"                  # *Writable* storage folder for cache, database, and sidecar files (DO NOT REMOVE)
+      - "${DOCKER_DATA_DIR}/photoprism/import:/photoprism/import"                  # *Writable* storage folder for cache, database, and sidecar files (DO NOT REMOVE)
+    networks:
+      - web
+    restart: unless-stopped
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb:10.11
+    security_opt: # see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
+      - seccomp:unconfined
+      - apparmor:unconfined
+    command: mariadbd --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
+    labels:
+      traefik.enable: true
+      traefik.tcp.routers.mariadb.rule: HostSNI(`mariadb.${DOMAIN}`)
+      traefik.tcp.routers.mariadb.entrypoints: tcp
+      traefik.tcp.routers.mariadb.tls: true
+      traefik.tcp.routers.mariadb.tls.certresolver: letsencrypt
+      traefik.port: 3306
+    environment:
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_INITDB_SKIP_TZINFO: "1"
+      MARIADB_DATABASE: "photoprism"
+      MARIADB_USER: "A76u88kqT875"
+      MARIADB_PASSWORD: "CBUi47Y9z9@h33@2sB9&!3u#"
+      MARIADB_ROOT_PASSWORD: "CBUi47Y9z9@h33@2sB9&!3u#"
+    ports:
+      - ${MARIADB_TCP_PORT}:3306
+    volumes:
+      - "${DOCKER_DATA_DIR}/photoprism/database:/var/lib/mysql" # DO NOT REMOVE
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

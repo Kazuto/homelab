@@ -5,7 +5,7 @@ services:
     image: oznu/cloudflare-ddns:latest
     container_name: "cloudflare-ddns"
     environment:
-      - API_KEY=AskVh21xlQsQWDh_VpkqDTANWfHlW72lJEVYnHPP
-      - ZONE=${DOMAIN}
-      - CRON=*/5 * * * *
+      - "API_KEY=F_0Rp5VdRP-gGEu6H3OQY5xtQHRei5qA-WKUYjVW"
+      - "ZONE=${DOMAIN}"
+      - "CRON=*/5 * * * *"
     restart: unless-stopped

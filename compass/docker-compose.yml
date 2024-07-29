@@ -21,13 +21,9 @@ services:
       - ADMIN_USERNAME="kazuto"
       - ADMIN_PASSWORD="%@JuP97r*yRkE#x*j9J4*@Z2"
       - ADMIN_EMAIL="mail@kazuto.de"
-      - MICROSOFT_CLIENT_ID=ccdaad3a-0533-4eb0-ad79-b1aa8235d4d6
-      - MICROSOFT_CLIENT_SECRET=2ED8Q~TmxWWARMF3-KKSTuU~pRB03~7quQ3oYbLj
-      - AZURE_CLIENT_ID=a19a8afa-e191-47a1-be42-bdcc409c6e01
-      - AZURE_CLIENT_SECRET=5oG8Q~WQ2.awJgPzGGDhfPeGLRdxpKMT5PQgYaYh
-      - AZURE_TENANT_ID=ef720f06-c68a-4451-8fd4-4b3b112a42b7
     restart: unless-stopped
 
 networks:
   web:
     name: traefik_web
+    external: true

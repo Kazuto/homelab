@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  smake:
+    image: devkazuto/compass:test
+    container_name: smake
+    ports:
+      - 12531:80
+    labels:
+      traefik.enable: true
+      traefik.http.routers.smake.entrypoints: websecure
+      traefik.http.routers.smake.tls: true
+      traefik.http.routers.smake.tls.certresolver: letsencrypt
+      traefik.http.services.smake.loadbalancer.server.port: 80
+      traefik.port: 80
+    volumes:
+      - ${DOCKER_DATA_DIR}/compass_smake:/config
+    networks:
+      - web
+    environment:
+      - ADMIN_USERNAME="kazuto"
+      - ADMIN_PASSWORD="%@JuP97r*yRkE#x*j9J4*@Z2"
+      - ADMIN_EMAIL="mail@kazuto.de"
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true
