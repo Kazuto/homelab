@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   # The restserver and joex containers defined here are configured
   # using env variables. Both must connect to the same database and
@@ -158,5 +156,6 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true
   docspell:
     name: docspell

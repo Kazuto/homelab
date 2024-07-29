@@ -1,4 +1,3 @@
-version: "3"
 
 services:
   vaultwarden:
@@ -23,6 +22,7 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true
     driver: bridge
     ipam:
       config:

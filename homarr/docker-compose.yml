@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   homarr:
     image: ghcr.io/ajnart/homarr:latest
@@ -24,3 +22,4 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true

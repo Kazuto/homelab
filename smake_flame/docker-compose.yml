@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   smake:
     image: pawelmalak/flame:latest

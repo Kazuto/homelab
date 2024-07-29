@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   spotify:
     image: lscr.io/linuxserver/your_spotify:latest
@@ -30,3 +28,4 @@ services:
 networks:
   web:
     name: traefik_web
+    external: true

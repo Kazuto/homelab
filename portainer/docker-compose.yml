@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   portainer:
     image: portainer/portainer-ce:2.15.1
@@ -27,3 +25,4 @@ networks:
   web:
     name: traefik_web
     driver: bridge
+    external: true
