@@ -25,3 +25,5 @@
 | 9090 | Traefik | HTTPS |
 | 9443 | Portainer | HTTPS |
 | 25565 | Minecraft | TCP |
+
+docker-compose --env-file ../.env  up -d
