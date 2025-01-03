@@ -4,12 +4,11 @@ services:
     container_name: minecraft
     environment:
       EULA: "TRUE"
-      TYPE: "CURSEFORGE"
-      CF_SERVER_MOD: "/modpacks/CMA+Server+Files+0.4.2.zip"
-      # CF_SERVER_MOD: "/modpacks/ATM7SKY-1.0.4.zip"
-      #TYPE: "FTBA"
-      #FTB_MODPACK_ID: 95
-      #FTB_MODPACK_VERSION_ID: 2239
+      TYPE: "AUTO_CURSEFORGE"
+      # CF_SERVER_MOD: "/modpacks/Craftoria-Server-1.6.1.zip"
+      CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-10
+      CF_API_KEY: ${CF_API_KEY}
+      MEMORY: 10G
     labels:
       traefik.enable: true
       traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
@@ -18,7 +17,7 @@ services:
     ports:
       - ${MINECRAFT_TCP_PORT}:25565
     volumes:
-      - '${DOCKER_DATA_DIR}/minecraft/cma:/data'
+      - '${DOCKER_DATA_DIR}/minecraft/atm10:/data'
       - '${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks'
     tty: true
     stdin_open: true
