@@ -1,17 +1,17 @@
 global:
-  checkNewVersion: true
+  checkNewVersion: false
   sendAnonymousUsage: false
 
 serversTransport:
   insecureSkipVerify: true
-  
+
 entrypoints:
   web:
     address: :80
     forwardedHeaders:
       insecure: true
-      trustedIPs: &trustedIps
-        # Start of Clouflare public IP list for HTTP requests, remove this if you don't use it
+      trustedIPs:
+        &trustedIps # Start of Clouflare public IP list for HTTP requests, remove this if you don't use it
         - 173.245.48.0/20
         - 103.21.244.0/22
         - 103.22.200.0/22
@@ -40,25 +40,25 @@ entrypoints:
           to: websecure
           scheme: https
 
-  websecure: 
+  websecure:
     address: :443
     forwardedHeaders:
       insecure: true
       trustedIPs: *trustedIps
-    http: 
+    http:
       tls:
         certResolver: letsencrypt
-        domains: 
+        domains:
           - main: fae.sh
-            sans: 
-              - '*.fae.sh'
+            sans:
+              - "*.fae.sh"
       middlewares:
         - securityHeaders@file
 
-  tcp: 
+  tcp:
     address: :9090
 
-providers: 
+providers:
   providersThrottleDuration: 2s
 
   # File provider for connecting things that are outside of docker / defining middleware
@@ -71,8 +71,7 @@ providers:
     watch: true
     network: traefik_web
     # Default host rule to containername.domain.example
-    defaultRule: "Host(`{{ index .Labels \"com.docker.compose.service\"}}.fae.sh`)"
-    swarmModeRefreshSeconds: 15s
+    defaultRule: 'Host(`{{ index .Labels "com.docker.compose.service"}}.fae.sh`)'
     exposedByDefault: false
 
 api:
@@ -83,11 +82,11 @@ log:
   level: INFO
 
 certificatesResolvers:
-  letsencrypt: 
+  letsencrypt:
     acme:
       email: kai@fae.sh
       storage: /letsencrypt/acme.json
-      tlschallenge: true
+      # tlschallenge: true
       dnsChallenge:
         provider: cloudflare
         # Used to make sure the dns challenge is propagated to the rights dns servers

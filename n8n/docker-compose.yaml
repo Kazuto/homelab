@@ -1,0 +1,29 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    labels:
+      traefik.enable: true
+      traefik.http.routers.n8n.entrypoints: websecure
+      traefik.http.routers.n8n.tls: true
+      traefik.http.routers.n8n.tls.certresolver: letsencrypt
+      traefik.http.services.n8n.loadbalancer.server.port: 5678
+      traefik.port: 5678
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBHOOK_URL="https://n8n.${DOMAIN}"
+      - N8N_PROXY_HOPS=1
+    ports:
+      - ${N8N_HTTP_PORT}:5678
+    volumes:
+      - "${DOCKER_DATA_DIR}/n8n/data:/home/node/.n8n"
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

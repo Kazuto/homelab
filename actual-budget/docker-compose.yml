@@ -1,0 +1,22 @@
+services:
+  actual:
+    image: actualbudget/actual-server:latest
+    container_name: actual
+    labels:
+      traefik.enable: true
+      traefik.http.routers.actual-budget.entrypoints: websecure
+      traefik.http.routers.actual-budget.tls: true
+      traefik.http.routers.actual-budget.tls.certresolver: letsencrypt
+      traefik.http.services.actual-budget.loadbalancer.server.port: 5006
+      traefik.http.middlewares.actual-budget-https-redirect.redirectscheme.scheme: https
+      traefik.port: 5006
+    ports:
+      - ${ACTUAL_BUDGET_HTTP_PORT:-5006}:5006 # HTTP port
+    volumes:
+      - ${DOCKER_DATA_DIR}/actual-budget:/data
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true

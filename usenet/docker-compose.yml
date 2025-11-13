@@ -91,7 +91,7 @@ services:
     volumes:
       - "${DOCKER_DATA_DIR}/radarr/data:/config"
       - "/mnt/media/movies/:/movies"
-      - "/mnt/storage/downloads/complete:/downloads/complete"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
@@ -125,7 +125,7 @@ services:
       - "${DOCKER_DATA_DIR}/sonarr/data:/config"
       - "/mnt/shows/shows/:/tv"
       - "/mnt/shows/anime/:/anime"
-      - "/mnt/storage/downloads/complete:/downloads/complete"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
@@ -159,44 +159,44 @@ services:
       - "${DOCKER_DATA_DIR}/lidarr/data:/config"
       - "/mnt/shows/audio_books/:/audio_books"
       - "/mnt/shows/music/:/music"
-      - "/mnt/storage/downloads/complete:/downloads/complete"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
     restart: unless-stopped
 
-  # whisparr:
-  #   image: ghcr.io/hotio/whisparr:latest
-  #   container_name: whisparr
-  #   environment:
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - TZ=${TZ}
-  #   labels:
-  #     traefik.enable: true
-  #     traefik.http.routers.whisparr.entrypoints: websecure
-  #     traefik.http.routers.whisparr.tls: true
-  #     traefik.http.routers.whisparr.tls.certresolver: letsencrypt
-  #     traefik.http.services.whisparr.loadbalancer.server.port: 6969
-  #     traefik.port: 6969
-  #     homepage.group: Downloads
-  #     homepage.name: Whisparr
-  #     homepage.icon: whisparr.png
-  #     homepage.href: https://whisparr.${DOMAIN}
-  #     homepage.widget.type: whisparr
-  #     homepage.widget.url: http://${LOCAL_IP}:${WHISPARR_HTTP_PORT}
-  #     homepage.widget.key: ${WHISPARR_API_KEY}
-  #     homepage.widget.enableQueue: true
-  #   ports:
-  #     - ${WHISPARR_HTTP_PORT}:6969
-  #   volumes:
-  #     - "${DOCKER_DATA_DIR}/whisparr/data:/config"
-  #     - "/mnt/media/adult/:/adult"
-  #     - "/mnt/storage/downloads/complete:/downloads/complete"
-  #   networks:
-  #     - web
-  #     - usenet
-  #   restart: unless-stopped
+  whisparr:
+    image: ghcr.io/hotio/whisparr:latest
+    container_name: whisparr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.whisparr.entrypoints: websecure
+      traefik.http.routers.whisparr.tls: true
+      traefik.http.routers.whisparr.tls.certresolver: letsencrypt
+      traefik.http.services.whisparr.loadbalancer.server.port: 6969
+      traefik.port: 6969
+      homepage.group: Downloads
+      homepage.name: Whisparr
+      homepage.icon: whisparr.png
+      homepage.href: https://whisparr.${DOMAIN}
+      homepage.widget.type: whisparr
+      homepage.widget.url: http://${LOCAL_IP}:${WHISPARR_HTTP_PORT}
+      homepage.widget.key: ${WHISPARR_API_KEY}
+      homepage.widget.enableQueue: true
+    ports:
+      - ${WHISPARR_HTTP_PORT}:6969
+    volumes:
+      - "${DOCKER_DATA_DIR}/whisparr/data:/config"
+      - "/mnt/media/adult/:/adult"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
+    networks:
+      - web
+      - usenet
+    restart: unless-stopped
 
   readarr:
     image: linuxserver/readarr:develop
@@ -225,56 +225,59 @@ services:
     volumes:
       - "${DOCKER_DATA_DIR}/readarr/data:/config"
       - "/mnt/shows/books/:/books"
-      - "/mnt/storage/downloads/complete:/downloads/complete"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
     restart: unless-stopped
 
-  # tdarr:
-  #   container_name: tdarr
-  #   image: ghcr.io/haveagitgat/tdarr:latest
-  #   restart: unless-stopped
-  #   network_mode: bridge
-  #   labels:
-  #     traefik.enable: true
-  #     traefik.http.routers.tdarr.entrypoints: websecure
-  #     traefik.http.routers.tdarr.tls: true
-  #     traefik.http.routers.tdarr.tls.certresolver: letsencrypt
-  #     traefik.http.services.tdarr.loadbalancer.server.port: 8265
-  #     traefik.port: 8265
-  #     homepage.group: Downloads
-  #     homepage.name: Tdarr
-  #     homepage.icon: tdarr.png
-  #     homepage.href: https://tdarr.${DOMAIN}
-  #     homepage.widget.type: tdarr
-  #     homepage.widget.url: http://${LOCAL_IP}:${TDARR_HTTP_PORT}
-  #     homepage.widget.key: ${TDARR_API_KEY}
-  #   ports:
-  #     - ${TDARR_HTTP_PORT}:8265 # webUI port
-  #     - 8266:8266 # server port
-  #   environment:
-  #     - TZ=${TZ}
-  #     - PUID=${PUID}
-  #     - PGID=${PGID}
-  #     - UMASK_SET=002
-  #     - serverIP=0.0.0.0
-  #     - serverPort=8266
-  #     - webUIPort=8265
-  #     - internalNode=true
-  #     - inContainer=true
-  #     - ffmpegVersion=7
-  #     - nodeName=InternalNode
-  #     - auth=false
-  #     - openBrowser=false
-  #     - maxLogSizeMB=10
-  #   volumes:
-  #     - "${DOCKER_DATA_DIR}/tdarr/server:/app/server"
-  #     - "${DOCKER_DATA_DIR}/tdarr/configs:/app/configs"
-  #     - "${DOCKER_DATA_DIR}/tdarr/logs:/app/logs"
-  #     - "/mnt/shows/shows:/media/tv"
-  #     - "/mnt/shows/anime:/media/anime"
-  #     - "/transcode_cache:/temp"
+  tdarr:
+    container_name: tdarr
+    image: ghcr.io/haveagitgat/tdarr:latest
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.tdarr.entrypoints: websecure
+      traefik.http.routers.tdarr.tls: true
+      traefik.http.routers.tdarr.tls.certresolver: letsencrypt
+      traefik.http.services.tdarr.loadbalancer.server.port: 8265
+      traefik.port: 8265
+      homepage.group: Downloads
+      homepage.name: Tdarr
+      homepage.icon: tdarr.png
+      homepage.href: https://tdarr.${DOMAIN}
+      homepage.widget.type: tdarr
+      homepage.widget.url: http://${LOCAL_IP}:${TDARR_HTTP_PORT}
+      homepage.widget.key: ${TDARR_API_KEY}
+    ports:
+      - ${TDARR_HTTP_PORT}:8265 # webUI port
+      - 8266:8266 # server port
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - UMASK_SET=002
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - internalNode=true
+      - inContainer=true
+      - ffmpegVersion=7
+      - nodeName=Server
+      - auth=false
+      - openBrowser=false
+      - maxLogSizeMB=10
+    volumes:
+      - "${DOCKER_DATA_DIR}/tdarr/server:/app/server"
+      - "${DOCKER_DATA_DIR}/tdarr/configs:/app/configs"
+      - "${DOCKER_DATA_DIR}/tdarr/logs:/app/logs"
+      - "${DOCKER_DATA_DIR}/tdarr/transcode_cache:/temp"
+      - "/mnt/media/movies:/media/movies"
+      - "/mnt/shows/shows:/media/tv"
+      - "/mnt/shows/anime:/media/anime"
+    networks:
+      - web
+      - usenet
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
@@ -307,33 +310,33 @@ services:
       - usenet
     restart: unless-stopped
 
-  # huntarr:
-  #   image: huntarr/huntarr:latest
-  #   container_name: huntarr
-  #   environment:
-  #     - TZ=${TZ}
-  #   labels:
-  #     traefik.enable: true
-  #     traefik.http.routers.huntarr.entrypoints: websecure
-  #     traefik.http.routers.huntarr.tls: true
-  #     traefik.http.routers.huntarr.tls.certresolver: letsencrypt
-  #     traefik.http.services.huntarr.loadbalancer.server.port: 9705
-  #     traefik.port: 9705
-  #     homepage.group: Downloads
-  #     homepage.name: Huntarr
-  #     homepage.icon: huntarr.png
-  #     homepage.href: https://huntarr.${DOMAIN}
-  #     homepage.widget.type: huntarr
-  #     homepage.widget.url: http://${LOCAL_IP}:${HUNTARR_HTTP_PORT}
-  #     homepage.widget.key: ${HUNTARR_API_KEY}
-  #   ports:
-  #     - ${HUNTARR_HTTP_PORT}:9705
-  #   volumes:
-  #     - "${DOCKER_DATA_DIR}/huntarr/config:/config"
-  #   networks:
-  #     - web
-  #     - usenet
-  #   restart: unless-stopped
+  huntarr:
+    image: huntarr/huntarr:latest
+    container_name: huntarr
+    environment:
+      - TZ=${TZ}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.huntarr.entrypoints: websecure
+      traefik.http.routers.huntarr.tls: true
+      traefik.http.routers.huntarr.tls.certresolver: letsencrypt
+      traefik.http.services.huntarr.loadbalancer.server.port: 9705
+      traefik.port: 9705
+      homepage.group: Downloads
+      homepage.name: Huntarr
+      homepage.icon: huntarr.png
+      homepage.href: https://huntarr.${DOMAIN}
+      homepage.widget.type: huntarr
+      homepage.widget.url: http://${LOCAL_IP}:${HUNTARR_HTTP_PORT}
+      homepage.widget.key: ${HUNTARR_API_KEY}
+    ports:
+      - ${HUNTARR_HTTP_PORT}:9705
+    volumes:
+      - "${DOCKER_DATA_DIR}/huntarr/config:/config"
+    networks:
+      - web
+      - usenet
+    restart: unless-stopped
 
   sabnzbd:
     image: linuxserver/sabnzbd:latest
@@ -361,9 +364,9 @@ services:
       - ${SABNZBD_HTTP_PORT}:8080
     volumes:
       - "${DOCKER_DATA_DIR}/sabnzbd:/config"
-      - "/mnt/storage/downloads/incomplete:/incomplete-downloads"
-      - "/mnt/storage/downloads/complete:/downloads/complete"
-      - "/mnt/storage/downloads/watch:/downloads/watch"
+      - "${DOWNLOAD_DIR}/incomplete:/incomplete-downloads"
+      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
+      - "${DOWNLOAD_DIR}/watch:/downloads/watch"
     networks:
       - web
       - usenet

@@ -1,0 +1,40 @@
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.searxng.rule: Host(`search.${DOMAIN}`)
+      traefik.http.routers.searxng.entrypoints: websecure
+      traefik.http.routers.searxng.tls: true
+      traefik.http.routers.searxng.tls.certresolver: letsencrypt
+      traefik.http.services.searxng.loadbalancer.server.port: 8080
+      homepage.group: Services
+      homepage.name: SearXNG
+      homepage.icon: searxng.png
+      homepage.href: https://search.${DOMAIN}
+      homepage.description: Privacy-respecting metasearch engine
+    volumes:
+      - ${DOCKER_DATA_DIR}/searxng:/etc/searxng:rw
+    environment:
+      - SEARXNG_BASE_URL=https://search.${DOMAIN}
+      - SEARXNG_SECRET=${SEARXNG_SECRET} # Add to .env file
+    networks:
+      - web
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "1"
+
+networks:
+  web:
+    name: traefik_web
+    external: true
