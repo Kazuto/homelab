@@ -193,7 +193,7 @@ services:
     restart: unless-stopped
 
   readarr:
-    image: linuxserver/readarr:develop
+    image: linuxserver/readarr:0.4.19-nightly
     container_name: readarr
     environment:
       - PUID=${PUID}
