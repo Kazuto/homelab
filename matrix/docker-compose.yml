@@ -9,6 +9,12 @@ services:
       traefik.http.routers.synapse.tls: true
       traefik.http.routers.synapse.tls.certresolver: letsencrypt
       traefik.http.services.synapse.loadbalancer.server.port: 8008
+      traefik.http.routers.synapse.middlewares: synapse-cors
+      traefik.http.middlewares.synapse-cors.headers.accesscontrolalloworiginlist: "*"
+      traefik.http.middlewares.synapse-cors.headers.accesscontrolallowmethods: "GET,POST,PUT,DELETE,OPTIONS"
+      traefik.http.middlewares.synapse-cors.headers.accesscontrolallowheaders: "Content-Type,Authorization,X-Requested-With"
+      traefik.http.middlewares.synapse-cors.headers.accesscontrolmaxage: 100
+      traefik.http.middlewares.synapse-cors.headers.addvaryheader: true
       homepage.group: Communication
       homepage.name: Matrix (Synapse)
       homepage.icon: matrix.png
