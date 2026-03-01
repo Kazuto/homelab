@@ -1,0 +1,107 @@
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse
+    labels:
+      traefik.enable: true
+      traefik.http.routers.synapse.rule: Host(`matrix.${DOMAIN}`)
+      traefik.http.routers.synapse.entrypoints: websecure
+      traefik.http.routers.synapse.tls: true
+      traefik.http.routers.synapse.tls.certresolver: letsencrypt
+      traefik.http.services.synapse.loadbalancer.server.port: 8008
+      homepage.group: Communication
+      homepage.name: Matrix (Synapse)
+      homepage.icon: matrix.png
+      homepage.href: https://matrix.${DOMAIN}
+    environment:
+      - TZ=${TZ}
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+    ports:
+      - ${SYNAPSE_PORT}:8448
+    volumes:
+      - ${DOCKER_DATA_DIR}/matrix/synapse:/data
+      - ${DOCKER_COMPOSE_DIR}/matrix/synapse/homeserver.yaml:/data/homeserver.yaml:ro
+      - ${DOCKER_COMPOSE_DIR}/matrix/synapse/log.config:/data/log.config:ro
+      - ${DOCKER_COMPOSE_DIR}/matrix/bridges:/data/bridges:ro
+    networks:
+      - web
+      - matrix
+    depends_on:
+      - matrix-postgres
+    restart: unless-stopped
+
+  matrix-postgres:
+    image: postgres:17
+    container_name: matrix-postgres
+    environment:
+      - POSTGRES_USER=synapse
+      - POSTGRES_PASSWORD=${SYNAPSE_DB_PASSWORD}
+      - POSTGRES_DB=synapse
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - ${DOCKER_DATA_DIR}/matrix/postgres:/var/lib/postgresql/data
+    networks:
+      - matrix
+    restart: unless-stopped
+
+  element:
+    image: vectorim/element-web:latest
+    container_name: element
+    labels:
+      traefik.enable: true
+      traefik.http.routers.element.rule: Host(`element.${DOMAIN}`)
+      traefik.http.routers.element.entrypoints: websecure
+      traefik.http.routers.element.tls: true
+      traefik.http.routers.element.tls.certresolver: letsencrypt
+      traefik.http.services.element.loadbalancer.server.port: 80
+      homepage.group: Communication
+      homepage.name: Element
+      homepage.icon: element.png
+      homepage.href: https://element.${DOMAIN}
+    ports:
+      - ${ELEMENT_PORT}:80
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/matrix/element/config.json:/app/config.json:ro
+    networks:
+      - web
+    restart: unless-stopped
+
+  mautrix-discord:
+    image: dock.mau.dev/mautrix/discord:latest
+    container_name: mautrix-discord
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/discord:/data
+    networks:
+      - matrix
+    depends_on:
+      - synapse
+    restart: unless-stopped
+
+  mautrix-whatsapp:
+    image: dock.mau.dev/mautrix/whatsapp:latest
+    container_name: mautrix-whatsapp
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/whatsapp:/data
+    networks:
+      - matrix
+    depends_on:
+      - synapse
+    restart: unless-stopped
+
+  mautrix-signal:
+    image: dock.mau.dev/mautrix/signal:latest
+    container_name: mautrix-signal
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/signal:/data
+    networks:
+      - matrix
+    depends_on:
+      - synapse
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  matrix:
+    name: matrix

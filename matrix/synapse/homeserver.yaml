@@ -1,0 +1,40 @@
+server_name: "matrix.fae.sh"
+public_baseurl: "https://matrix.fae.sh"
+
+pid_file: /data/homeserver.pid
+
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: psycopg2
+  args:
+    user: synapse
+    password: "${SYNAPSE_DB_PASSWORD}"
+    database: synapse
+    host: matrix-postgres
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/data/log.config"
+media_store_path: /data/media_store
+
+registration_shared_secret: "${SYNAPSE_REGISTRATION_SECRET}"
+enable_registration: false
+
+report_stats: false
+
+signing_key_path: "/data/matrix.fae.sh.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+app_service_config_files:
+  - /data/bridges/discord/registration.yaml
+  - /data/bridges/whatsapp/registration.yaml
+  - /data/bridges/signal/registration.yaml
