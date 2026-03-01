@@ -8,7 +8,7 @@
 #   BW_CLIENTSECRET  — Bitwarden API key client secret
 #   BW_PASSWORD      — Bitwarden master password (for unlocking)
 #
-# Get your API key at: https://bitwarden.com/help/personal-api-key/
+# Get your API key at: bitwarden.com → Account Settings → Security → Keys
 
 set -euo pipefail
 
@@ -36,15 +36,11 @@ check_vars() {
   fi
 }
 
-# Login with API key (no-op if already logged in), then unlock and export session
+# Login with API key (always logout first to clear stale tokens), then unlock
 bw_session() {
-  local status
-  status=$(bw status 2>/dev/null | jq -r '.status')
-
-  if [[ "$status" == "unauthenticated" ]]; then
-    echo "Logging in with API key..." >&2
-    bw login --apikey 2>/dev/null
-  fi
+  echo "Logging in with API key..." >&2
+  bw logout --quiet 2>/dev/null || true
+  bw login --apikey --quiet
 
   echo "Unlocking vault..." >&2
   bw unlock --passwordenv BW_PASSWORD --raw
