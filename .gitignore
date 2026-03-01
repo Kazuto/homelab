@@ -1,2 +1,5 @@
 .env
 logs/
+matrix/bridges/**/*.db
+matrix/bridges/**/*.db-shm
+matrix/bridges/**/*.db-wal

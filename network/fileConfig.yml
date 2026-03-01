@@ -39,7 +39,6 @@ http:
         customRequestHeaders:
           X-Forwarded-Proto: "https"
         customFrameOptionsValue: SAMEORIGIN
-        accessControlMaxAge: 100
         contentTypeNosniff: true
         browserXssFilter: true
         forceSTSHeader: true
