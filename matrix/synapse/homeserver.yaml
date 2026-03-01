@@ -16,7 +16,7 @@ database:
   name: psycopg2
   args:
     user: synapse
-    password: "${SYNAPSE_DB_PASSWORD}"
+    password: "kRs1KvgrS91w0BiXuau09RHRZTuZiPOl"
     database: synapse
     host: matrix-postgres
     cp_min: 5
@@ -25,7 +25,7 @@ database:
 log_config: "/data/log.config"
 media_store_path: /data/media_store
 
-registration_shared_secret: "${SYNAPSE_REGISTRATION_SECRET}"
+registration_shared_secret: "6z2i9asEny5GQ4qz7fr4pjC6nDnNxIe0"
 enable_registration: false
 
 report_stats: false
@@ -33,6 +33,7 @@ report_stats: false
 signing_key_path: "/data/matrix.fae.sh.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"
+suppress_key_server_warning: true
 
 app_service_config_files:
   - /data/bridges/discord/registration.yaml
