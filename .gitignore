@@ -3,3 +3,5 @@ logs/
 matrix/bridges/**/*.db
 matrix/bridges/**/*.db-shm
 matrix/bridges/**/*.db-wal
+matrix/bridges/**/config.yaml
+matrix/bridges/**/registration.yaml

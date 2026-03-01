@@ -28,7 +28,7 @@ services:
       - ${DOCKER_DATA_DIR}/matrix/synapse:/data
       - ${DOCKER_COMPOSE_DIR}/matrix/synapse/homeserver.yaml:/data/homeserver.yaml:ro
       - ${DOCKER_COMPOSE_DIR}/matrix/synapse/log.config:/data/log.config:ro
-      - ${DOCKER_COMPOSE_DIR}/matrix/bridges:/data/bridges:ro
+      - ${DOCKER_DATA_DIR}/matrix/bridges:/data/bridges:ro
     networks:
       - web
       - matrix
@@ -75,9 +75,8 @@ services:
   mautrix-discord:
     image: dock.mau.dev/mautrix/discord:latest
     container_name: mautrix-discord
-    user: "${PUID}:${PGID}"
     volumes:
-      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/discord:/data
+      - ${DOCKER_DATA_DIR}/matrix/bridges/discord:/data
     networks:
       - matrix
     depends_on:
@@ -87,9 +86,8 @@ services:
   mautrix-whatsapp:
     image: dock.mau.dev/mautrix/whatsapp:latest
     container_name: mautrix-whatsapp
-    user: "${PUID}:${PGID}"
     volumes:
-      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/whatsapp:/data
+      - ${DOCKER_DATA_DIR}/matrix/bridges/whatsapp:/data
     networks:
       - matrix
     depends_on:
@@ -99,9 +97,8 @@ services:
   mautrix-signal:
     image: dock.mau.dev/mautrix/signal:latest
     container_name: mautrix-signal
-    user: "${PUID}:${PGID}"
     volumes:
-      - ${DOCKER_COMPOSE_DIR}/matrix/bridges/signal:/data
+      - ${DOCKER_DATA_DIR}/matrix/bridges/signal:/data
     networks:
       - matrix
     depends_on:
