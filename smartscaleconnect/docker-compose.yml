@@ -1,7 +1,0 @@
-services:
-  scaleconnect:
-    image: alexxit/smartscaleconnect
-    environment:
-      - TZ=${TZ}
-    volumes:
-      - ${DOCKER_DATA_DIR}/scaleconnect:/config

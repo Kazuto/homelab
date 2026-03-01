@@ -16,7 +16,6 @@ services:
       traefik.http.routers.immich.tls.certresolver: letsencrypt
       traefik.http.services.immich.loadbalancer.server.port: 2283
       traefik.http.middlewares.immich-https-redirect.redirectscheme.scheme: https
-      traefik.port: 2283
       homepage.group: Media
       homepage.name: Immich
       homepage.icon: immich.png
@@ -30,7 +29,7 @@ services:
       DB_USERNAME: ${IMMICH_DB_USERNAME}
       DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME}
     ports:
-      - ${IMMICH_HTTP_PORT}:2283
+      - ${IMMICH_PORT}:2283
     expose:
       - 2283
     volumes:

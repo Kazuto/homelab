@@ -4,8 +4,8 @@ services:
     container_name: emby
     # network_mode: host # Enable DLNA and Wake-on-Lan
     ports:
-      - ${EMBY_HTTP_PORT}:8096 # HTTP port
-      - ${EMBY_HTTPS_PORT}:8920 # HTTPS port
+      - ${EMBY_PORT}:8096
+      - ${EMBY_HTTPS_PORT}:8920
     deploy:
       resources:
         limits:
@@ -33,7 +33,7 @@ services:
       homepage.href: https://emby.${DOMAIN}
       homepage.widget.type: emby
       homepage.widget.key: ${EMBY_API_KEY}
-      homepage.widget.url: http://${LOCAL_IP}:${EMBY_HTTP_PORT}
+      homepage.widget.url: http://${LOCAL_IP}:${EMBY_PORT}
       homepage.widget.enableBlocks: true
     volumes:
       - ${DOCKER_DATA_DIR}/emby-4.8/config:/config
@@ -59,7 +59,7 @@ services:
     ports:
       - "${TELEGRAM_BOT_PORT}:5000"
     environment:
-      - EMBY_BASE_URL=http://${LOCAL_IP}:${EMBY_HTTP_PORT}
+      - EMBY_BASE_URL=http://${LOCAL_IP}:${EMBY_PORT}
       - EMBY_API_KEY=${EMBY_API_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
@@ -78,18 +78,17 @@ services:
       traefik.http.routers.jellyfin.tls.certresolver: letsencrypt
       traefik.http.services.jellyfin.loadbalancer.server.port: 8096
       traefik.http.middlewares.jellyfin-https-redirect.redirectscheme.scheme: https
-      traefik.port: 8096
       homepage.group: Media
       homepage.name: Jellyfin
       homepage.icon: jellyfin.png
       homepage.href: https://jellyfin.${DOMAIN}
       homepage.widget.type: jellyfin
       homepage.widget.key: ${JELLYFIN_API_KEY}
-      homepage.widget.url: http://${LOCAL_IP}:${JELLYFIN_HTTP_PORT}
+      homepage.widget.url: http://${LOCAL_IP}:${JELLYFIN_PORT}
       homepage.widget.enableBlocks: true
     ports:
-      - ${JELLYFIN_HTTP_PORT}:8096 # HTTP port
-      - ${JELLYFIN_HTTPS_PORT}:8920 # HTTPS port
+      - ${JELLYFIN_PORT}:8096
+      - ${JELLYFIN_HTTPS_PORT}:8920
     volumes:
       - ${DOCKER_DATA_DIR}/jellyfin/config:/config
       - ${DOCKER_DATA_DIR}/jellyfin/cache:/cache

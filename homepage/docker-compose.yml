@@ -12,9 +12,8 @@ services:
       traefik.http.routers.homepage.tls: true
       traefik.http.routers.homepage.tls.certresolver: letsencrypt
       traefik.http.services.homepage.loadbalancer.server.port: 3000
-      traefik.port: 3000
     ports:
-      - ${HOMEPAGE_HTTPS_PORT}:3000
+      - ${HOMEPAGE_PORT}:3000
     networks:
       - web
     volumes:

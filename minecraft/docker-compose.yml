@@ -12,9 +12,8 @@ services:
       traefik.enable: true
       traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
       traefik.tcp.routers.minecraft.entrypoints: tcp
-      traefik.port: 25565
     ports:
-      - ${MINECRAFT_TCP_PORT}:25565
+      - ${MINECRAFT_PORT}:25565
     volumes:
       - "${DOCKER_DATA_DIR}/minecraft/stoneblock-4:/data"
       - "${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks"

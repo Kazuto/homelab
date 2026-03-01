@@ -10,7 +10,6 @@ services:
       traefik.http.routers.portainer.tls: true
       traefik.http.routers.portainer.tls.certresolver: letsencrypt
       traefik.http.services.portainer.loadbalancer.server.port: 9000
-      traefik.port: 9000
       homepage.group: Homelab
       homepage.name: Portainer
       homepage.icon: portainer.png
