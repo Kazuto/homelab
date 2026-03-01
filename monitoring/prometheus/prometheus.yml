@@ -15,6 +15,10 @@ scrape_configs:
     static_configs:
       - targets: ["cadvisor:8080"]
 
+  - job_name: traefik
+    static_configs:
+      - targets: ["traefik:8080"]
+
   - job_name: speedtest
     scrape_interval: 30m   # align with SPEEDTEST_SCHEDULE; Prometheus triggers the actual test
     scrape_timeout: 120s

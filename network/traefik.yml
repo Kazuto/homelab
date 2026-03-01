@@ -78,6 +78,12 @@ api:
   dashboard: true
   insecure: true
 
+metrics:
+  prometheus:
+    addEntryPointsLabels: true
+    addServicesLabels: true
+    addRoutersLabels: true
+
 log:
   level: INFO
 

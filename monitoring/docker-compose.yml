@@ -74,6 +74,7 @@ services:
       - ${DOCKER_DATA_DIR}/prometheus/data:/prometheus
     networks:
       - monitoring
+      - web
     restart: unless-stopped
 
   node-exporter:
@@ -122,4 +123,3 @@ networks:
     external: true
   monitoring:
     name: monitoring
-    driver: bridge
