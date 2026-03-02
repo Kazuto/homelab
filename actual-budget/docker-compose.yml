@@ -4,15 +4,17 @@ services:
     container_name: actual
     labels:
       traefik.enable: true
+      traefik.http.routers.actual-budget.rule: Host(`budget.${DOMAIN}`)
       traefik.http.routers.actual-budget.entrypoints: websecure
       traefik.http.routers.actual-budget.tls: true
       traefik.http.routers.actual-budget.tls.certresolver: letsencrypt
       traefik.http.services.actual-budget.loadbalancer.server.port: 5006
-      traefik.http.middlewares.actual-budget-https-redirect.redirectscheme.scheme: https
     ports:
       - ${ACTUAL_BUDGET_PORT:-5006}:5006
     volumes:
       - ${DOCKER_DATA_DIR}/actual-budget:/data
+    networks:
+      - web
     restart: unless-stopped
 
 networks:
