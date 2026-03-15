@@ -149,7 +149,7 @@ services:
       homepage.widget.key: ${LIDARR_API_KEY}
       homepage.widget.enableQueue: true
     ports:
-      - ${LIDARR_PORT}:8989
+      - ${LIDARR_PORT}:8686
     volumes:
       - "${DOCKER_DATA_DIR}/lidarr/data:/config"
       - "/mnt/shows/audio_books/:/audio_books"

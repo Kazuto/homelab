@@ -22,7 +22,3 @@ networks:
   web:
     name: traefik_web
     external: true
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.90.0/24
