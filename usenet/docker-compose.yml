@@ -301,33 +301,6 @@ services:
       - usenet
     restart: unless-stopped
 
-  huntarr:
-    image: huntarr/huntarr:latest
-    container_name: huntarr
-    environment:
-      - TZ=${TZ}
-    labels:
-      traefik.enable: true
-      traefik.http.routers.huntarr.entrypoints: websecure
-      traefik.http.routers.huntarr.tls: true
-      traefik.http.routers.huntarr.tls.certresolver: letsencrypt
-      traefik.http.services.huntarr.loadbalancer.server.port: 9705
-      homepage.group: Downloads
-      homepage.name: Huntarr
-      homepage.icon: huntarr.png
-      homepage.href: https://huntarr.${DOMAIN}
-      homepage.widget.type: huntarr
-      homepage.widget.url: http://${LOCAL_IP}:${HUNTARR_PORT}
-      homepage.widget.key: ${HUNTARR_API_KEY}
-    ports:
-      - ${HUNTARR_PORT}:9705
-    volumes:
-      - "${DOCKER_DATA_DIR}/huntarr/config:/config"
-    networks:
-      - web
-      - usenet
-    restart: unless-stopped
-
   sabnzbd:
     image: linuxserver/sabnzbd:latest
     container_name: sabnzbd

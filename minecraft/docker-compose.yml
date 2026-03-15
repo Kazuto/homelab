@@ -8,6 +8,7 @@ services:
       CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/ftb-stoneblock-4
       CF_API_KEY: ${CURSEFORGE_API_KEY}
       MEMORY: 10G
+      OPS: ${MINECRAFT_OPS:-YourUsername}
     labels:
       traefik.enable: true
       traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
@@ -15,6 +16,7 @@ services:
     ports:
       - ${MINECRAFT_PORT}:25565
     volumes:
+      # - "${DOCKER_DATA_DIR}/minecraft/vanilla-server:/data"
       - "${DOCKER_DATA_DIR}/minecraft/stoneblock-4:/data"
       - "${DOCKER_DATA_DIR}/minecraft/modpacks:/modpacks"
     tty: true
@@ -27,4 +29,3 @@ networks:
   web:
     name: traefik_web
     external: true
-
