@@ -58,6 +58,9 @@ entrypoints:
   tcp:
     address: :9090
 
+  minecraft:
+    address: :25565
+
 providers:
   providersThrottleDuration: 2s
 
