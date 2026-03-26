@@ -105,6 +105,26 @@ services:
       - synapse
     restart: unless-stopped
 
+  synapse-admin:
+    image: awesometechnologies/synapse-admin:latest
+    container_name: synapse-admin
+    labels:
+      traefik.enable: true
+      traefik.http.routers.synapse-admin.rule: Host(`matrix-admin.${DOMAIN}`)
+      traefik.http.routers.synapse-admin.entrypoints: websecure
+      traefik.http.routers.synapse-admin.tls: true
+      traefik.http.routers.synapse-admin.tls.certresolver: letsencrypt
+      traefik.http.services.synapse-admin.loadbalancer.server.port: 80
+      homepage.group: Communication
+      homepage.name: Matrix Admin
+      homepage.icon: matrix.png
+      homepage.href: https://matrix-admin.${DOMAIN}
+    ports:
+      - ${SYNAPSE_ADMIN_PORT}:80
+    networks:
+      - web
+    restart: unless-stopped
+
 networks:
   web:
     name: traefik_web
