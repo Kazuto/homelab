@@ -1,0 +1,48 @@
+{
+	"$schema": "../packages/config/src/ConfigSchema.json",
+	"env": "production",
+	"domain": {
+		"base_domain": "fluxer.${DOMAIN}",
+		"public_scheme": "https",
+		"public_port": 443
+	},
+	"database": {
+		"backend": "sqlite",
+		"sqlite_path": "/usr/src/app/data/fluxer.db"
+	},
+	"internal": {
+		"kv": "redis://valkey:6379/0",
+		"kv_mode": "standalone"
+	},
+	"s3": {
+		"access_key_id": "fluxer",
+		"secret_access_key": "${FLUXER_S3_SECRET}",
+		"endpoint": "http://127.0.0.1:8080/s3"
+	},
+	"services": {
+		"server": {
+			"port": 8080,
+			"host": "0.0.0.0"
+		},
+		"media_proxy": {
+			"secret_key": "${FLUXER_MEDIA_SECRET}"
+		},
+		"admin": {
+			"secret_key_base": "${FLUXER_ADMIN_SECRET}",
+			"oauth_client_secret": "${FLUXER_OAUTH_SECRET}"
+		},
+		"marketing": {
+			"enabled": false,
+			"secret_key_base": "${FLUXER_MARKETING_SECRET}"
+		},
+		"gateway": {
+			"port": 8082,
+			"admin_reload_secret": "${FLUXER_GATEWAY_SECRET}",
+			"media_proxy_endpoint": "http://127.0.0.1:8080/media"
+		}
+	},
+	"auth": {
+		"sudo_mode_secret": "${FLUXER_SUDO_SECRET}",
+		"connection_initiation_secret": "${FLUXER_CONNECTION_SECRET}"
+	}
+}

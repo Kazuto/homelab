@@ -5,3 +5,5 @@ matrix/bridges/**/*.db-shm
 matrix/bridges/**/*.db-wal
 matrix/bridges/**/config.yaml
 matrix/bridges/**/registration.yaml
+matrix/sydent/sydent.conf
+fluxer/config/config.json

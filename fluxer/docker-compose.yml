@@ -1,0 +1,61 @@
+services:
+  valkey:
+    image: valkey/valkey:8.0.6-alpine
+    container_name: fluxer-valkey
+    restart: unless-stopped
+    command: ['valkey-server', '--appendonly', 'yes', '--save', '60', '1', '--loglevel', 'warning']
+    volumes:
+      - ${DOCKER_DATA_DIR}/fluxer/valkey:/data
+    networks:
+      - fluxer
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fluxer:
+    image: ghcr.io/fluxerapp/fluxer-server:stable
+    container_name: fluxer
+    restart: unless-stopped
+    init: true
+    labels:
+      traefik.enable: true
+      traefik.http.routers.fluxer.rule: Host(`fluxer.${DOMAIN}`)
+      traefik.http.routers.fluxer.entrypoints: websecure
+      traefik.http.routers.fluxer.tls: true
+      traefik.http.routers.fluxer.tls.certresolver: letsencrypt
+      traefik.http.services.fluxer.loadbalancer.server.port: 8080
+      homepage.group: Communication
+      homepage.name: Fluxer
+      homepage.icon: mdi-chat
+      homepage.href: https://fluxer.${DOMAIN}
+      homepage.description: Self-hosted messaging platform
+    environment:
+      - FLUXER_CONFIG=/usr/src/app/config/config.json
+      - NODE_ENV=production
+      - TZ=${TZ}
+    ports:
+      - ${FLUXER_PORT}:8080
+    depends_on:
+      valkey:
+        condition: service_healthy
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/fluxer/config:/usr/src/app/config:ro
+      - ${DOCKER_DATA_DIR}/fluxer/data:/usr/src/app/data
+    networks:
+      - web
+      - fluxer
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:8080/_health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  fluxer:
+    name: fluxer
