@@ -125,6 +125,49 @@ services:
       - web
     restart: unless-stopped
 
+  sydent:
+    image: matrixdotorg/sydent:latest
+    container_name: sydent
+    labels:
+      traefik.enable: true
+      traefik.http.routers.sydent.rule: Host(`matrix-identity.${DOMAIN}`)
+      traefik.http.routers.sydent.entrypoints: websecure
+      traefik.http.routers.sydent.tls: true
+      traefik.http.routers.sydent.tls.certresolver: letsencrypt
+      traefik.http.services.sydent.loadbalancer.server.port: 8090
+      homepage.group: Communication
+      homepage.name: Identity Server
+      homepage.icon: matrix.png
+      homepage.href: https://matrix-identity.${DOMAIN}
+    environment:
+      - TZ=${TZ}
+    ports:
+      - ${SYDENT_PORT}:8090
+    volumes:
+      - ${DOCKER_DATA_DIR}/matrix/sydent:/data
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    networks:
+      - web
+    restart: unless-stopped
+
+  well-known:
+    image: nginx:alpine
+    container_name: matrix-well-known
+    labels:
+      traefik.enable: true
+      traefik.http.routers.well-known.rule: (Host(`${DOMAIN}`) || Host(`matrix.${DOMAIN}`)) && PathPrefix(`/.well-known/matrix`)
+      traefik.http.routers.well-known.entrypoints: websecure
+      traefik.http.routers.well-known.tls: true
+      traefik.http.routers.well-known.tls.certresolver: letsencrypt
+      traefik.http.routers.well-known.priority: 100
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/matrix/well-known:/usr/share/nginx/html/.well-known/matrix:ro
+    networks:
+      - web
+    restart: unless-stopped
+
 networks:
   web:
     name: traefik_web

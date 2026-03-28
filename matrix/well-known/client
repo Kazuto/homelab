@@ -1,0 +1,8 @@
+{
+    "m.homeserver": {
+        "base_url": "https://matrix.fae.sh"
+    },
+    "m.identity_server": {
+        "base_url": "https://matrix-identity.fae.sh"
+    }
+}

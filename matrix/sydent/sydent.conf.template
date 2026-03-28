@@ -1,0 +1,34 @@
+[DEFAULT]
+
+[general]
+server.name = ${DOMAIN}
+pidfile.path = /data/sydent.pid
+
+[http]
+clientapi.http.bind_address = ::
+clientapi.http.port = 8090
+internalapi.http.bind_address = ::
+internalapi.http.port = 8091
+replication.https.certfile =
+replication.https.bind_address = ::
+replication.https.port = 4434
+
+[db]
+db.file = /data/sydent.db
+
+[crypto]
+hashing_function = sha256
+symmetric.secret = ${SYDENT_SECRET}
+
+[email]
+# Email verification (optional)
+# email.from = noreply@${DOMAIN}
+# email.smtphost = localhost
+# email.smtpport = 25
+# email.tlsmode = 0
+
+[sms]
+# SMS verification (optional - not configured)
+
+[matrix]
+matrix.server = matrix.${DOMAIN}
