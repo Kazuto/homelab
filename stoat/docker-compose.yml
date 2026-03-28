@@ -1,0 +1,312 @@
+services:
+  # Database Services
+  database:
+    image: mongo:4.4
+    container_name: stoat-database
+    environment:
+      - MONGO_INITDB_DATABASE=revolt
+    volumes:
+      - ${DOCKER_DATA_DIR}/stoat/mongodb:/data/db
+    networks:
+      - stoat
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  redis:
+    image: eqalpha/keydb:latest
+    container_name: stoat-redis
+    command: keydb-server --save 60 1 --loglevel warning
+    volumes:
+      - ${DOCKER_DATA_DIR}/stoat/redis:/data
+    networks:
+      - stoat
+    healthcheck:
+      test: keydb-cli ping | grep PONG
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  rabbit:
+    image: rabbitmq:4-management-alpine
+    container_name: stoat-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbituser
+      - RABBITMQ_DEFAULT_PASS=rabbitpass
+    volumes:
+      - ${DOCKER_DATA_DIR}/stoat/rabbitmq:/var/lib/rabbitmq
+    networks:
+      - stoat
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: stoat-minio
+    command: server /data
+    environment:
+      - MINIO_ROOT_USER=minioautumn
+      - MINIO_ROOT_PASSWORD=minioautumn
+      - MINIO_DOMAIN=minio
+    volumes:
+      - ${DOCKER_DATA_DIR}/stoat/minio:/data
+    networks:
+      - stoat
+    restart: unless-stopped
+
+  # LiveKit for Voice/Video
+  livekit:
+    image: ghcr.io/stoatchat/livekit-server:v1.9.6
+    container_name: stoat-livekit
+    command: --config /etc/livekit/livekit.yml
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-livekit.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/livekit`)
+      traefik.http.routers.stoat-livekit.entrypoints: websecure
+      traefik.http.routers.stoat-livekit.tls: true
+      traefik.http.routers.stoat-livekit.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-livekit.priority: 10
+      traefik.http.routers.stoat-livekit.middlewares: stoat-livekit-strip
+      traefik.http.middlewares.stoat-livekit-strip.stripprefix.prefixes: /livekit
+      traefik.http.services.stoat-livekit.loadbalancer.server.port: 7880
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/livekit.yml:/etc/livekit/livekit.yml:ro
+    ports:
+      - "7880:7880/tcp"
+      - "7881:7881/tcp"
+      - "50200-50300:50200-50300/udp"
+    networks:
+      - stoat
+      - web
+    restart: unless-stopped
+
+  # Application Services
+  api:
+    image: ghcr.io/stoatchat/api:v0.11.5
+    container_name: stoat-api
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-api.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/api`)
+      traefik.http.routers.stoat-api.entrypoints: websecure
+      traefik.http.routers.stoat-api.tls: true
+      traefik.http.routers.stoat-api.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-api.priority: 10
+      traefik.http.routers.stoat-api.middlewares: stoat-api-strip
+      traefik.http.middlewares.stoat-api-strip.stripprefix.prefixes: /api
+      traefik.http.services.stoat-api.loadbalancer.server.port: 14702
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+      - web
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    restart: unless-stopped
+
+  events:
+    image: ghcr.io/stoatchat/events:v0.11.5
+    container_name: stoat-events
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-events.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/ws`)
+      traefik.http.routers.stoat-events.entrypoints: websecure
+      traefik.http.routers.stoat-events.tls: true
+      traefik.http.routers.stoat-events.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-events.priority: 10
+      traefik.http.routers.stoat-events.middlewares: stoat-events-strip
+      traefik.http.middlewares.stoat-events-strip.stripprefix.prefixes: /ws
+      traefik.http.services.stoat-events.loadbalancer.server.port: 14703
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+      - web
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    restart: unless-stopped
+
+  autumn:
+    image: ghcr.io/stoatchat/file-server:v0.11.5
+    container_name: stoat-autumn
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-autumn.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/autumn`)
+      traefik.http.routers.stoat-autumn.entrypoints: websecure
+      traefik.http.routers.stoat-autumn.tls: true
+      traefik.http.routers.stoat-autumn.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-autumn.priority: 10
+      traefik.http.routers.stoat-autumn.middlewares: stoat-autumn-strip
+      traefik.http.middlewares.stoat-autumn-strip.stripprefix.prefixes: /autumn
+      traefik.http.services.stoat-autumn.loadbalancer.server.port: 14704
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+      - web
+    depends_on:
+      - minio
+    restart: unless-stopped
+
+  january:
+    image: ghcr.io/stoatchat/proxy:v0.11.5
+    container_name: stoat-january
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-january.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/january`)
+      traefik.http.routers.stoat-january.entrypoints: websecure
+      traefik.http.routers.stoat-january.tls: true
+      traefik.http.routers.stoat-january.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-january.priority: 10
+      traefik.http.routers.stoat-january.middlewares: stoat-january-strip
+      traefik.http.middlewares.stoat-january-strip.stripprefix.prefixes: /january
+      traefik.http.services.stoat-january.loadbalancer.server.port: 14705
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+      - web
+    restart: unless-stopped
+
+  gifbox:
+    image: ghcr.io/stoatchat/gifbox:v0.11.5
+    container_name: stoat-gifbox
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-gifbox.rule: Host(`chat.${DOMAIN}`) && PathPrefix(`/gifbox`)
+      traefik.http.routers.stoat-gifbox.entrypoints: websecure
+      traefik.http.routers.stoat-gifbox.tls: true
+      traefik.http.routers.stoat-gifbox.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-gifbox.priority: 10
+      traefik.http.routers.stoat-gifbox.middlewares: stoat-gifbox-strip
+      traefik.http.middlewares.stoat-gifbox-strip.stripprefix.prefixes: /gifbox
+      traefik.http.services.stoat-gifbox.loadbalancer.server.port: 14706
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+      - web
+    restart: unless-stopped
+
+  pushd:
+    image: ghcr.io/stoatchat/pushd:v0.11.5
+    container_name: stoat-pushd
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbit:
+        condition: service_healthy
+    restart: unless-stopped
+
+  voice-ingress:
+    image: ghcr.io/stoatchat/voice-ingress:v0.11.5
+    container_name: stoat-voice-ingress
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+    depends_on:
+      - livekit
+    restart: unless-stopped
+
+  # Coturn TURN server
+  coturn:
+    image: coturn/coturn:latest
+    container_name: stoat-coturn
+    network_mode: host
+    command:
+      - --listening-port=3478
+      - --min-port=49152
+      - --max-port=49200
+      - --realm=chat.${DOMAIN}
+      - --lt-cred-mech
+      - --user=stoat:${TURN_SECRET}
+      - --log-file=stdout
+      - --fingerprint
+      - --listening-ip=0.0.0.0
+      - --relay-ip=0.0.0.0
+    restart: unless-stopped
+
+  crond:
+    image: ghcr.io/stoatchat/crond:v0.11.5
+    container_name: stoat-crond
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
+    networks:
+      - stoat
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Web Frontend
+  web:
+    image: ghcr.io/stoatchat/for-web:103d2bf
+    container_name: stoat-web
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stoat-web.rule: Host(`chat.${DOMAIN}`)
+      traefik.http.routers.stoat-web.entrypoints: websecure
+      traefik.http.routers.stoat-web.tls: true
+      traefik.http.routers.stoat-web.tls.certresolver: letsencrypt
+      traefik.http.routers.stoat-web.priority: 1
+      traefik.http.services.stoat-web.loadbalancer.server.port: 5000
+      homepage.group: Communication
+      homepage.name: Stoat Chat
+      homepage.icon: revolt.png
+      homepage.href: https://chat.${DOMAIN}
+      homepage.description: Self-hosted chat platform
+    environment:
+      - TZ=${TZ}
+    env_file:
+      - ${DOCKER_COMPOSE_DIR}/stoat/config/.env.web
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  stoat:
+    name: stoat
+  web:
+    name: traefik_web
+    external: true

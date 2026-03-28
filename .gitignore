@@ -7,3 +7,6 @@ matrix/bridges/**/config.yaml
 matrix/bridges/**/registration.yaml
 matrix/sydent/sydent.conf
 fluxer/config/config.json
+stoat/config/Revolt.toml
+stoat/config/livekit.yml
+stoat/config/.env.web

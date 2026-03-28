@@ -1,0 +1,53 @@
+# Stoat Configuration
+# This file will be generated on your homelab server using the secrets from .env
+
+[mongodb]
+uri = "mongodb://database:27017/revolt"
+
+[redis]
+uri = "redis://redis:6379"
+
+[rabbitmq]
+uri = "amqp://stoat:RABBITMQ_PASSWORD@rabbitmq:5672"
+
+[s3]
+# Using MinIO for S3-compatible storage
+endpoint = "http://minio:9000"
+bucket = "stoat"
+region = "us-east-1"
+access_key_id = "stoat"
+secret_access_key = "MINIO_PASSWORD"
+use_path_style = true
+
+[pushd]
+vapid_private_key = "VAPID_PRIVATE_KEY"
+vapid_public_key = "VAPID_PUBLIC_KEY"
+
+[files]
+encryption_key = "FILES_ENCRYPTION_KEY"
+
+[livekit]
+url = "http://livekit:7880"
+key = "LIVEKIT_KEY"
+secret = "LIVEKIT_SECRET"
+
+[api]
+url = "https://chat.fae.sh/api"
+public_url = "https://chat.fae.sh"
+
+[events]
+url = "wss://chat.fae.sh/ws"
+
+[autumn]
+public_url = "https://chat.fae.sh/autumn"
+
+[january]
+public_url = "https://chat.fae.sh/january"
+
+[gifbox]
+public_url = "https://chat.fae.sh/gifbox"
+
+[features]
+captcha_enabled = false
+email_enabled = false
+invite_only = false
