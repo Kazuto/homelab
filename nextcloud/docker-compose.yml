@@ -1,0 +1,96 @@
+services:
+  nextcloud:
+    image: nextcloud:30-apache
+    container_name: nextcloud
+    depends_on:
+      - database
+      - redis
+    labels:
+      traefik.enable: true
+      traefik.http.routers.nextcloud.rule: Host(`cloud.${DOMAIN}`)
+      traefik.http.routers.nextcloud.entrypoints: websecure
+      traefik.http.routers.nextcloud.tls: true
+      traefik.http.routers.nextcloud.tls.certresolver: letsencrypt
+      traefik.http.services.nextcloud.loadbalancer.server.port: 80
+      traefik.http.middlewares.nextcloud-caldav.redirectregex.permanent: true
+      traefik.http.middlewares.nextcloud-caldav.redirectregex.regex: ^https://(.*)/.well-known/(card|cal)dav
+      traefik.http.middlewares.nextcloud-caldav.redirectregex.replacement: https://$${1}/remote.php/dav/
+      traefik.http.routers.nextcloud.middlewares: nextcloud-caldav
+      homepage.group: Productivity
+      homepage.name: Nextcloud
+      homepage.icon: nextcloud.png
+      homepage.href: https://cloud.${DOMAIN}
+      homepage.description: Personal cloud storage
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_DB: ${NEXTCLOUD_DB_NAME}
+      POSTGRES_USER: ${NEXTCLOUD_DB_USER}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
+      REDIS_HOST: redis
+      NEXTCLOUD_TRUSTED_DOMAINS: cloud.${DOMAIN}
+      OVERWRITEPROTOCOL: https
+      OVERWRITECLIURL: https://cloud.${DOMAIN}
+      OVERWRITEHOST: cloud.${DOMAIN}
+    ports:
+      - ${NEXTCLOUD_PORT}:80
+    volumes:
+      - ${DOCKER_DATA_DIR}/nextcloud/html:/var/www/html
+      - ${DOCKER_DATA_DIR}/nextcloud/data:/var/www/html/data
+      - ${DOCKER_DATA_DIR}/nextcloud/config:/var/www/html/config
+      - ${DOCKER_DATA_DIR}/nextcloud/apps:/var/www/html/custom_apps
+    networks:
+      - web
+      - nextcloud
+    restart: unless-stopped
+
+  database:
+    image: postgres:16-alpine
+    container_name: nextcloud_postgres
+    environment:
+      POSTGRES_DB: ${NEXTCLOUD_DB_NAME}
+      POSTGRES_USER: ${NEXTCLOUD_DB_USER}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
+    volumes:
+      - ${DOCKER_DATA_DIR}/nextcloud/database:/var/lib/postgresql/data
+    networks:
+      - nextcloud
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: nextcloud_redis
+    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASSWORD}
+    volumes:
+      - ${DOCKER_DATA_DIR}/nextcloud/redis:/data
+    networks:
+      - nextcloud
+    restart: unless-stopped
+
+  cron:
+    image: nextcloud:30-apache
+    container_name: nextcloud_cron
+    depends_on:
+      - database
+      - redis
+    entrypoint: /cron.sh
+    environment:
+      POSTGRES_HOST: database
+      POSTGRES_DB: ${NEXTCLOUD_DB_NAME}
+      POSTGRES_USER: ${NEXTCLOUD_DB_USER}
+      POSTGRES_PASSWORD: ${NEXTCLOUD_DB_PASSWORD}
+      REDIS_HOST: redis
+    volumes:
+      - ${DOCKER_DATA_DIR}/nextcloud/html:/var/www/html
+      - ${DOCKER_DATA_DIR}/nextcloud/data:/var/www/html/data
+      - ${DOCKER_DATA_DIR}/nextcloud/config:/var/www/html/config
+      - ${DOCKER_DATA_DIR}/nextcloud/apps:/var/www/html/custom_apps
+    networks:
+      - nextcloud
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  nextcloud:
+    name: nextcloud
