@@ -31,6 +31,9 @@ services:
       OVERWRITEPROTOCOL: https
       OVERWRITECLIURL: https://cloud.${DOMAIN}
       OVERWRITEHOST: cloud.${DOMAIN}
+      TRUSTED_PROXIES: 172.16.0.0/12 10.0.0.0/8
+      APACHE_DISABLE_REWRITE_IP: 1
+      DEFAULT_PHONE_REGION: ${NEXTCLOUD_PHONE_REGION:-US}
     ports:
       - ${NEXTCLOUD_PORT}:80
     volumes:
@@ -59,7 +62,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: nextcloud_redis
-    command: redis-server --requirepass ${NEXTCLOUD_REDIS_PASSWORD}
     volumes:
       - ${DOCKER_DATA_DIR}/nextcloud/redis:/data
     networks:
