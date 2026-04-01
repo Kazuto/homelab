@@ -82,6 +82,18 @@ services:
     networks:
       - web
 
+  cloudflare-ddns:
+    image: oznu/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    restart: unless-stopped
+    environment:
+      - API_KEY=${CF_DNS_API_TOKEN}
+      - ZONE=${DOMAIN}
+      - SUBDOMAIN=mc
+      - PROXIED=false
+    networks:
+      - web
+
 networks:
   web:
     name: traefik_web
