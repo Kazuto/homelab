@@ -17,6 +17,8 @@ services:
       TZ: ${TZ}
       OPS: ${MINECRAFT_OPS:-YourUsername}
       MOTD: "Willkommen auf dem Server von ${MINECRAFT_OPS}"
+      ENABLE_QUERY: "true"
+      QUERY_PORT: 25565
     labels:
       traefik.enable: true
       traefik.tcp.routers.minecraft.rule: HostSNI(`mc.${DOMAIN}`)
@@ -24,7 +26,8 @@ services:
       traefik.tcp.routers.minecraft.service: minecraft
       traefik.tcp.services.minecraft.loadbalancer.server.port: 25565
     ports:
-      - ${MINECRAFT_PORT}:25565
+      - ${MINECRAFT_PORT}:25565/tcp
+      - ${MINECRAFT_PORT}:25565/udp
     volumes:
       # - "${DOCKER_DATA_DIR}/minecraft/vanilla-server:/data"
       # - "${DOCKER_DATA_DIR}/minecraft/stoneblock-4:/data"
