@@ -1,0 +1,60 @@
+services:
+  etherpad:
+    image: etherpad/etherpad:latest
+    container_name: etherpad
+    user: "0:0"
+    tty: true
+    stdin_open: true
+    depends_on:
+      - postgres
+    labels:
+      traefik.enable: true
+      traefik.http.routers.etherpad.entrypoints: websecure
+      traefik.http.routers.etherpad.tls: true
+      traefik.http.routers.etherpad.tls.certresolver: letsencrypt
+      traefik.http.services.etherpad.loadbalancer.server.port: 9001
+    environment:
+      NODE_ENV: production
+      ADMIN_PASSWORD: ${DOCKER_COMPOSE_APP_ADMIN_PASSWORD:-admin}
+      DB_CHARSET: ${DOCKER_COMPOSE_APP_DB_CHARSET:-utf8mb4}
+      DB_HOST: postgres
+      DB_NAME: ${DOCKER_COMPOSE_POSTGRES_DATABASE:-etherpad}
+      DB_PASS: ${DOCKER_COMPOSE_POSTGRES_PASSWORD:-admin}
+      DB_PORT: ${DOCKER_COMPOSE_POSTGRES_PORT:-5432}
+      DB_TYPE: "postgres"
+      DB_USER: ${DOCKER_COMPOSE_POSTGRES_USER:-admin}
+      # For now, the env var DEFAULT_PAD_TEXT cannot be unset or empty; it seems to be mandatory in the latest version of etherpad
+      DEFAULT_PAD_TEXT: ${DOCKER_COMPOSE_APP_DEFAULT_PAD_TEXT:- }
+      DISABLE_IP_LOGGING: ${DOCKER_COMPOSE_APP_DISABLE_IP_LOGGING:-false}
+      SOFFICE: ${DOCKER_COMPOSE_APP_SOFFICE:-null}
+      TRUST_PROXY: ${DOCKER_COMPOSE_APP_TRUST_PROXY:-true}
+    ports:
+      - ${ETHERPAD_PORT}:9001
+    networks:
+      - web
+      - etherpad
+    volumes:
+      - ${DOCKER_DATA_DIR}/etherpad/var:/opt/etherpad-lite/var
+      - ${DOCKER_DATA_DIR}/etherpad/plugins:/opt/etherpad-lite/src/plugin_packages
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${DOCKER_COMPOSE_POSTGRES_DATABASE:-etherpad}
+      POSTGRES_PASSWORD: ${DOCKER_COMPOSE_POSTGRES_PASSWORD:-admin}
+      POSTGRES_PORT: ${DOCKER_COMPOSE_POSTGRES_PORT:-5432}
+      POSTGRES_USER: ${DOCKER_COMPOSE_POSTGRES_USER:-admin}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    networks:
+      - etherpad
+    volumes:
+      - ${DOCKER_DATA_DIR}/etherpad/postgres:/var/lib/postgresql/data/pgdata
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  etherpad:
+    name: etherpad
