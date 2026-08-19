@@ -2,7 +2,6 @@ services:
   emby:
     image: emby/embyserver:4.8.8.0
     container_name: emby
-    # network_mode: host # Enable DLNA and Wake-on-Lan
     ports:
       - ${EMBY_PORT}:8096
       - ${EMBY_HTTPS_PORT}:8920
@@ -39,34 +38,12 @@ services:
       - ${DOCKER_DATA_DIR}/emby-4.8/config:/config
       # - ${DOCKER_DATA_DIR}/emby/themes:/system/dashboard-ui/modules/themes
       - /mnt/backup/services/emby:/mnt/backup # Backup directory
-      - /mnt/media/movies:/mnt/movies # Media directory
-      - /mnt/shows/shows:/mnt/shows # Media directory
-      - /mnt/shows/anime:/mnt/anime # Media directory
-      - /mnt/shows/audio_books:/mnt/audio_books # Media directory
+      - /mnt/media:/mnt/media # Media directory
     devices:
       - /dev/dri:/dev/dri # For H/W transcoding
     networks:
       - web
-      - telegram
     restart: unless-stopped
-
-  emby-telegram-notifier:
-    container_name: emby-telegram-notifier
-    image: fahmula/emby-telegram-notifier
-    restart: unless-stopped
-    depends_on:
-      - emby
-    ports:
-      - "${TELEGRAM_BOT_PORT}:5000"
-    environment:
-      - EMBY_BASE_URL=http://${LOCAL_IP}:${EMBY_PORT}
-      - EMBY_API_KEY=${EMBY_API_KEY}
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
-      - SEASON_ADDED_WITHIN_X_DAYS=3
-      - EPISODE_PREMIERED_WITHIN_X_DAYS=365
-    networks:
-      - telegram
 
   jellyfin:
     image: jellyfin/jellyfin
@@ -93,14 +70,14 @@ services:
       - ${DOCKER_DATA_DIR}/jellyfin/config:/config
       - ${DOCKER_DATA_DIR}/jellyfin/cache:/cache
       - /mnt/backup/services/jellyfin:/mnt/backup # Backup directory
-      - /mnt/media/adult:/mnt/adult # Media directory
-    restart: "unless-stopped"
+      - /mnt/media:/mnt/media # Media directory
+    devices:
+      - /dev/dri:/dev/dri
     networks:
       - web
+    restart: "unless-stopped"
 
 networks:
   web:
     name: traefik_web
     external: true
-  telegram:
-    name: telegram

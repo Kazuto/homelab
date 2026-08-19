@@ -29,38 +29,38 @@ services:
       - usenet
     restart: unless-stopped
 
-  bazarr:
-    image: linuxserver/bazarr:latest
-    container_name: bazarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    labels:
-      traefik.enable: true
-      traefik.http.routers.bazarr.entrypoints: websecure
-      traefik.http.routers.bazarr.tls: true
-      traefik.http.routers.bazarr.tls.certresolver: letsencrypt
-      traefik.http.services.bazarr.loadbalancer.server.port: 6767
-      homepage.group: Downloads
-      homepage.name: Bazarr
-      homepage.icon: bazarr.png
-      homepage.href: https://bazarr.${DOMAIN}
-      homepage.widget.type: bazarr
-      homepage.widget.url: http://${LOCAL_IP}:${BAZARR_PORT}
-      homepage.widget.key: ${BAZARR_API_KEY}
-      homepage.widget.enableQueue: true
-    ports:
-      - ${BAZARR_PORT}:6767
-    volumes:
-      - "${DOCKER_DATA_DIR}/bazarr/data:/config"
-      - "/mnt/shows/shows/:/tv"
-      - "/mnt/shows/anime/:/anime"
-      - "/mnt/media/movies/:/movies"
-    networks:
-      - web
-      - usenet
-    restart: unless-stopped
+  # bazarr:
+  #   image: linuxserver/bazarr:latest
+  #   container_name: bazarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.bazarr.entrypoints: websecure
+  #     traefik.http.routers.bazarr.tls: true
+  #     traefik.http.routers.bazarr.tls.certresolver: letsencrypt
+  #     traefik.http.services.bazarr.loadbalancer.server.port: 6767
+  #     homepage.group: Downloads
+  #     homepage.name: Bazarr
+  #     homepage.icon: bazarr.png
+  #     homepage.href: https://bazarr.${DOMAIN}
+  #     homepage.widget.type: bazarr
+  #     homepage.widget.url: http://${LOCAL_IP}:${BAZARR_PORT}
+  #     homepage.widget.key: ${BAZARR_API_KEY}
+  #     homepage.widget.enableQueue: true
+  #   ports:
+  #     - ${BAZARR_PORT}:6767
+  #   volumes:
+  #     - "${DOCKER_DATA_DIR}/bazarr/data:/config"
+  #     - "/mnt/media/shows/:/tv"
+  #     - "/mnt/media/anime/:/anime"
+  #     - "/mnt/media/movies/:/movies"
+  #   networks:
+  #     - web
+  #     - usenet
+  #   restart: unless-stopped
 
   radarr:
     image: linuxserver/radarr:latest
@@ -87,7 +87,7 @@ services:
       - ${RADARR_PORT}:7878
     volumes:
       - "${DOCKER_DATA_DIR}/radarr/data:/config"
-      - "/mnt/media/movies/:/movies"
+      - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
@@ -119,46 +119,45 @@ services:
       - ${SONARR_PORT}:8989
     volumes:
       - "${DOCKER_DATA_DIR}/sonarr/data:/config"
-      - "/mnt/shows/shows/:/tv"
-      - "/mnt/shows/anime/:/anime"
+      - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
     restart: unless-stopped
 
-  lidarr:
-    image: linuxserver/lidarr:latest
-    container_name: lidarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    labels:
-      traefik.enable: true
-      traefik.http.routers.lidarr.entrypoints: websecure
-      traefik.http.routers.lidarr.tls: true
-      traefik.http.routers.lidarr.tls.certresolver: letsencrypt
-      traefik.http.services.lidarr.loadbalancer.server.port: 8686
-      homepage.group: Downloads
-      homepage.name: Lidarr
-      homepage.icon: lidarr.png
-      homepage.href: https://lidarr.${DOMAIN}
-      homepage.widget.type: lidarr
-      homepage.widget.url: http://${LOCAL_IP}:${LIDARR_PORT}
-      homepage.widget.key: ${LIDARR_API_KEY}
-      homepage.widget.enableQueue: true
-    ports:
-      - ${LIDARR_PORT}:8686
-    volumes:
-      - "${DOCKER_DATA_DIR}/lidarr/data:/config"
-      - "/mnt/shows/audio_books/:/audio_books"
-      - "/mnt/shows/music/:/music"
-      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
-    networks:
-      - web
-      - usenet
-    restart: unless-stopped
+  # lidarr:
+  #   image: linuxserver/lidarr:latest
+  #   container_name: lidarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.lidarr.entrypoints: websecure
+  #     traefik.http.routers.lidarr.tls: true
+  #     traefik.http.routers.lidarr.tls.certresolver: letsencrypt
+  #     traefik.http.services.lidarr.loadbalancer.server.port: 8686
+  #     homepage.group: Downloads
+  #     homepage.name: Lidarr
+  #     homepage.icon: lidarr.png
+  #     homepage.href: https://lidarr.${DOMAIN}
+  #     homepage.widget.type: lidarr
+  #     homepage.widget.url: http://${LOCAL_IP}:${LIDARR_PORT}
+  #     homepage.widget.key: ${LIDARR_API_KEY}
+  #     homepage.widget.enableQueue: true
+  #   ports:
+  #     - ${LIDARR_PORT}:8686
+  #   volumes:
+  #     - "${DOCKER_DATA_DIR}/lidarr/data:/config"
+  #     - "/mnt/media/audio_books/:/audio_books"
+  #     - "/mnt/media/music/:/music"
+  #     - "${DOWNLOAD_DIR}/complete:/downloads/complete"
+  #   networks:
+  #     - web
+  #     - usenet
+  #   restart: unless-stopped
 
   whisparr:
     image: ghcr.io/hotio/whisparr:latest
@@ -185,117 +184,115 @@ services:
       - ${WHISPARR_PORT}:6969
     volumes:
       - "${DOCKER_DATA_DIR}/whisparr/data:/config"
-      - "/mnt/media/adult/:/adult"
+      - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
       - web
       - usenet
     restart: unless-stopped
 
-  readarr:
-    image: linuxserver/readarr:0.4.19-nightly
-    container_name: readarr
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-    labels:
-      traefik.enable: true
-      traefik.http.routers.readarr.entrypoints: websecure
-      traefik.http.routers.readarr.tls: true
-      traefik.http.routers.readarr.tls.certresolver: letsencrypt
-      traefik.http.services.readarr.loadbalancer.server.port: 8787
-      homepage.group: Downloads
-      homepage.name: Readarr
-      homepage.icon: readarr.png
-      homepage.href: https://readarr.${DOMAIN}
-      homepage.widget.type: readarr
-      homepage.widget.url: http://${LOCAL_IP}:${READARR_PORT}
-      homepage.widget.key: ${READARR_API_KEY}
-      homepage.widget.enableQueue: true
-    ports:
-      - ${READARR_PORT}:8787
-    volumes:
-      - "${DOCKER_DATA_DIR}/readarr/data:/config"
-      - "/mnt/shows/books/:/books"
-      - "${DOWNLOAD_DIR}/complete:/downloads/complete"
-    networks:
-      - web
-      - usenet
-    restart: unless-stopped
+  # readarr:
+  #   image: linuxserver/readarr:0.4.19-nightly
+  #   container_name: readarr
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${TZ}
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.readarr.entrypoints: websecure
+  #     traefik.http.routers.readarr.tls: true
+  #     traefik.http.routers.readarr.tls.certresolver: letsencrypt
+  #     traefik.http.services.readarr.loadbalancer.server.port: 8787
+  #     homepage.group: Downloads
+  #     homepage.name: Readarr
+  #     homepage.icon: readarr.png
+  #     homepage.href: https://readarr.${DOMAIN}
+  #     homepage.widget.type: readarr
+  #     homepage.widget.url: http://${LOCAL_IP}:${READARR_PORT}
+  #     homepage.widget.key: ${READARR_API_KEY}
+  #     homepage.widget.enableQueue: true
+  #   ports:
+  #     - ${READARR_PORT}:8787
+  #   volumes:
+  #     - "${DOCKER_DATA_DIR}/readarr/data:/config"
+  #     - "/mnt/media/books/:/books"
+  #     - "${DOWNLOAD_DIR}/complete:/downloads/complete"
+  #   networks:
+  #     - web
+  #     - usenet
+  #   restart: unless-stopped
 
-  tdarr:
-    container_name: tdarr
-    image: ghcr.io/haveagitgat/tdarr:latest
-    restart: unless-stopped
-    labels:
-      traefik.enable: true
-      traefik.http.routers.tdarr.entrypoints: websecure
-      traefik.http.routers.tdarr.tls: true
-      traefik.http.routers.tdarr.tls.certresolver: letsencrypt
-      traefik.http.services.tdarr.loadbalancer.server.port: 8265
-      homepage.group: Downloads
-      homepage.name: Tdarr
-      homepage.icon: tdarr.png
-      homepage.href: https://tdarr.${DOMAIN}
-      homepage.widget.type: tdarr
-      homepage.widget.url: http://${LOCAL_IP}:${TDARR_PORT}
-      homepage.widget.key: ${TDARR_API_KEY}
-    ports:
-      - ${TDARR_PORT}:8265 # webUI port
-      - 8266:8266 # server port
-    environment:
-      - TZ=${TZ}
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - UMASK_SET=002
-      - serverIP=0.0.0.0
-      - serverPort=8266
-      - webUIPort=8265
-      - internalNode=true
-      - inContainer=true
-      - ffmpegVersion=7
-      - nodeName=Server
-      - auth=false
-      - openBrowser=false
-      - maxLogSizeMB=10
-    volumes:
-      - "${DOCKER_DATA_DIR}/tdarr/server:/app/server"
-      - "${DOCKER_DATA_DIR}/tdarr/configs:/app/configs"
-      - "${DOCKER_DATA_DIR}/tdarr/logs:/app/logs"
-      - "${DOCKER_DATA_DIR}/tdarr/transcode_cache:/temp"
-      - "/mnt/media/movies:/media/movies"
-      - "/mnt/shows/shows:/media/tv"
-      - "/mnt/shows/anime:/media/anime"
-    networks:
-      - web
-      - usenet
+  # tdarr:
+  #   container_name: tdarr
+  #   image: ghcr.io/haveagitgat/tdarr:latest
+  #   restart: unless-stopped
+  #   labels:
+  #     traefik.enable: true
+  #     traefik.http.routers.tdarr.entrypoints: websecure
+  #     traefik.http.routers.tdarr.tls: true
+  #     traefik.http.routers.tdarr.tls.certresolver: letsencrypt
+  #     traefik.http.services.tdarr.loadbalancer.server.port: 8265
+  #     homepage.group: Downloads
+  #     homepage.name: Tdarr
+  #     homepage.icon: tdarr.png
+  #     homepage.href: https://tdarr.${DOMAIN}
+  #     homepage.widget.type: tdarr
+  #     homepage.widget.url: http://${LOCAL_IP}:${TDARR_PORT}
+  #     homepage.widget.key: ${TDARR_API_KEY}
+  #   ports:
+  #     - ${TDARR_PORT}:8265 # webUI port
+  #     - 8266:8266 # server port
+  #   environment:
+  #     - TZ=${TZ}
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - UMASK_SET=002
+  #     - serverIP=0.0.0.0
+  #     - serverPort=8266
+  #     - webUIPort=8265
+  #     - internalNode=true
+  #     - inContainer=true
+  #     - ffmpegVersion=7
+  #     - nodeName=Server
+  #     - auth=false
+  #     - openBrowser=false
+  #     - maxLogSizeMB=10
+  #   volumes:
+  #     - "${DOCKER_DATA_DIR}/tdarr/server:/app/server"
+  #     - "${DOCKER_DATA_DIR}/tdarr/configs:/app/configs"
+  #     - "${DOCKER_DATA_DIR}/tdarr/logs:/app/logs"
+  #     - "${DOCKER_DATA_DIR}/tdarr/transcode_cache:/temp"
+  #     - "/mnt/media/movies:/media/movies"
+  #     - "/mnt/media/shows:/media/tv"
+  #     - "/mnt/media/anime:/media/anime"
+  #   networks:
+  #     - web
+  #     - usenet
 
-  jellyseerr:
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=${TZ}
-      - JELLYFIN_TYPE=emby
     labels:
       traefik.enable: true
-      traefik.http.routers.jellyseerr.entrypoints: websecure
-      traefik.http.routers.jellyseerr.tls: true
-      traefik.http.routers.jellyseerr.tls.certresolver: letsencrypt
-      traefik.http.services.jellyseerr.loadbalancer.server.port: 5055
+      traefik.http.routers.seerr.entrypoints: websecure
+      traefik.http.routers.seerr.tls: true
+      traefik.http.routers.seerr.tls.certresolver: letsencrypt
+      traefik.http.services.seerr.loadbalancer.server.port: 5055
       homepage.group: Downloads
-      homepage.name: Jellyseerr
-      homepage.icon: jellyseerr.png
-      homepage.href: https://jellyseerr.${DOMAIN}
-      homepage.widget.type: jellyseerr
-      homepage.widget.url: http://${LOCAL_IP}:${JELLYSEERR_PORT}
-      homepage.widget.key: ${JELLYSEERR_API_KEY}
+      homepage.name: Seerr
+      homepage.icon: Seerr.png
+      homepage.href: https://seerr.${DOMAIN}
+      homepage.widget.type: seerr
+      homepage.widget.url: http://${LOCAL_IP}:${SEERR_PORT}
+      homepage.widget.key: ${SEERR_API_KEY}
     ports:
-      - ${JELLYSEERR_PORT}:5055
+      - ${SEERR_PORT}:5055
     volumes:
-      - "${DOCKER_DATA_DIR}/jellyseerr/config:/app/config"
+      - "${DOCKER_DATA_DIR}/seerr/config:/app/config"
     networks:
       - web
       - usenet
