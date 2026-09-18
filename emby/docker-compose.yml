@@ -42,7 +42,7 @@ services:
     devices:
       - /dev/dri:/dev/dri # For H/W transcoding
     networks:
-      - web
+      web:
     restart: unless-stopped
 
   jellyfin:
@@ -74,7 +74,7 @@ services:
     devices:
       - /dev/dri:/dev/dri
     networks:
-      - web
+      web:
     restart: "unless-stopped"
 
 networks:

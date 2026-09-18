@@ -11,18 +11,18 @@ services:
       traefik.http.routers.calibre.tls.certresolver: letsencrypt
       traefik.http.services.calibre.loadbalancer.server.port: 8083
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - DOCKER_MODS=linuxserver/mods:universal-calibre #optional
-      - OAUTHLIB_RELAX_TOKEN_SCOPE=1
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
+      DOCKER_MODS: linuxserver/mods:universal-calibre #optional
+      OAUTHLIB_RELAX_TOKEN_SCOPE: 1
     ports:
-      - ${CALIBRE_PORT}:8083
+      - ${CALIBRE_PORT:-8083}:8083
     volumes:
-      - '${DOCKER_DATA_DIR}/calibre/config:/config'
+      - '${DOCKER_DATA_DIR:-/var/lib/docker}/calibre/config:/config'
       - '/f/_shared/library:/books'
     networks:
-      - web
+      web:
     restart: unless-stopped
 
 networks:

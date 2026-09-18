@@ -15,7 +15,7 @@ services:
     volumes:
       - ${DOCKER_DATA_DIR}/vaultwarden:/data/
     networks:
-      - web
+      web:
     restart: unless-stopped
     
 networks:

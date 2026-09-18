@@ -3,7 +3,7 @@ services:
     image: portainer/portainer-ce:lts
     container_name: portainer
     environment:
-      TZ: ${TZ}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.portainer.entrypoints: websecure
@@ -13,19 +13,19 @@ services:
       homepage.group: Homelab
       homepage.name: Portainer
       homepage.icon: portainer.png
-      homepage.href: https://portainer.${DOMAIN}
+      homepage.href: https://portainer.${DOMAIN:-example.com}
       homepage.widget.type: portainer
-      homepage.widget.url: http://${LOCAL_IP}:${PORTAINER_GUI_PORT}
+      homepage.widget.url: http://${LOCAL_IP:-127.0.0.1}:${PORTAINER_GUI_PORT:-9000}
       homepage.widget.env: 3
-      homepage.widget.key: ${PORTAINER_API_KEY}
+      homepage.widget.key: ${PORTAINER_API_KEY:-key}
     ports:
-      - ${PORTAINER_SSH_PORT}:8000
-      - ${PORTAINER_GUI_PORT}:9000
+      - ${PORTAINER_SSH_PORT:-8000}:8000
+      - ${PORTAINER_GUI_PORT:-9000}:9000
     volumes:
-      - ${DOCKER_DATA_DIR}/portainer/:/data
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/portainer/:/data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - web
+      web:
     restart: unless-stopped
 
 networks:

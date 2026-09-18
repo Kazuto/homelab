@@ -4,11 +4,11 @@ services:
     image: mongo:4.4
     container_name: stoat-database
     environment:
-      - MONGO_INITDB_DATABASE=revolt
+      MONGO_INITDB_DATABASE: revolt
     volumes:
       - ${DOCKER_DATA_DIR}/stoat/mongodb:/data/db
     networks:
-      - stoat
+      stoat:
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
       interval: 10s
@@ -24,7 +24,7 @@ services:
     volumes:
       - ${DOCKER_DATA_DIR}/stoat/redis:/data
     networks:
-      - stoat
+      stoat:
     healthcheck:
       test: keydb-cli ping | grep PONG
       interval: 10s
@@ -37,12 +37,12 @@ services:
     image: rabbitmq:4-management-alpine
     container_name: stoat-rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=rabbituser
-      - RABBITMQ_DEFAULT_PASS=rabbitpass
+      RABBITMQ_DEFAULT_USER: rabbituser
+      RABBITMQ_DEFAULT_PASS: rabbitpass
     volumes:
       - ${DOCKER_DATA_DIR}/stoat/rabbitmq:/var/lib/rabbitmq
     networks:
-      - stoat
+      stoat:
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 10s
@@ -56,13 +56,13 @@ services:
     container_name: stoat-minio
     command: server /data
     environment:
-      - MINIO_ROOT_USER=minioautumn
-      - MINIO_ROOT_PASSWORD=minioautumn
-      - MINIO_DOMAIN=minio
+      MINIO_ROOT_USER: minioautumn
+      MINIO_ROOT_PASSWORD: minioautumn
+      MINIO_DOMAIN: minio
     volumes:
       - ${DOCKER_DATA_DIR}/stoat/minio:/data
     networks:
-      - stoat
+      stoat:
     restart: unless-stopped
 
   # LiveKit for Voice/Video
@@ -87,8 +87,8 @@ services:
       - "7881:7881/tcp"
       - "50200-50300:50200-50300/udp"
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     restart: unless-stopped
 
   # Application Services
@@ -106,12 +106,12 @@ services:
       traefik.http.middlewares.stoat-api-strip.stripprefix.prefixes: /api
       traefik.http.services.stoat-api.loadbalancer.server.port: 14702
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     depends_on:
       database:
         condition: service_healthy
@@ -135,12 +135,12 @@ services:
       traefik.http.middlewares.stoat-events-strip.stripprefix.prefixes: /ws
       traefik.http.services.stoat-events.loadbalancer.server.port: 14703
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     depends_on:
       database:
         condition: service_healthy
@@ -164,12 +164,12 @@ services:
       traefik.http.middlewares.stoat-autumn-strip.stripprefix.prefixes: /autumn
       traefik.http.services.stoat-autumn.loadbalancer.server.port: 14704
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     depends_on:
       - minio
     restart: unless-stopped
@@ -188,12 +188,12 @@ services:
       traefik.http.middlewares.stoat-january-strip.stripprefix.prefixes: /january
       traefik.http.services.stoat-january.loadbalancer.server.port: 14705
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     restart: unless-stopped
 
   gifbox:
@@ -210,23 +210,23 @@ services:
       traefik.http.middlewares.stoat-gifbox-strip.stripprefix.prefixes: /gifbox
       traefik.http.services.stoat-gifbox.loadbalancer.server.port: 14706
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
-      - web
+      stoat:
+      web:
     restart: unless-stopped
 
   pushd:
     image: ghcr.io/stoatchat/pushd:v0.11.5
     container_name: stoat-pushd
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
+      stoat:
     depends_on:
       database:
         condition: service_healthy
@@ -238,11 +238,11 @@ services:
     image: ghcr.io/stoatchat/voice-ingress:v0.11.5
     container_name: stoat-voice-ingress
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
+      stoat:
     depends_on:
       - livekit
     restart: unless-stopped
@@ -269,11 +269,11 @@ services:
     image: ghcr.io/stoatchat/crond:v0.11.5
     container_name: stoat-crond
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     volumes:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/Revolt.toml:/Revolt.toml:ro
     networks:
-      - stoat
+      stoat:
     depends_on:
       database:
         condition: service_healthy
@@ -297,7 +297,7 @@ services:
       homepage.href: https://chat.${DOMAIN}
       homepage.description: Self-hosted chat platform
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     env_file:
       - ${DOCKER_COMPOSE_DIR}/stoat/config/.env.web
     networks:

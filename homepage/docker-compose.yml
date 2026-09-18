@@ -5,7 +5,7 @@ services:
     environment:
       # PUID: ${PUID}
       # PGID: ${PGID}
-      HOMEPAGE_ALLOWED_HOSTS: homepage.fae.sh,${LOCAL_IP}:${HOMEPAGE_PORT} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+       HOMEPAGE_ALLOWED_HOSTS: homepage.fae.sh,${LOCAL_IP:-127.0.0.1}:${HOMEPAGE_PORT:-3000} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
     labels:
       traefik.enable: true
       traefik.http.routers.homepage.entrypoints: websecure
@@ -15,7 +15,7 @@ services:
     ports:
       - ${HOMEPAGE_PORT}:3000
     networks:
-      - web
+      web:
     volumes:
       - ${DOCKER_DATA_DIR}/homepage/config:/app/config # Make sure your local config directory exists
       - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations

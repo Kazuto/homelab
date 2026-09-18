@@ -32,20 +32,20 @@ services:
       homepage.href: https://fluxer.${DOMAIN}
       homepage.description: Self-hosted messaging platform
     environment:
-      - FLUXER_CONFIG=/usr/src/app/config/config.json
-      - NODE_ENV=production
-      - TZ=${TZ}
+      FLUXER_CONFIG: /usr/src/app/config/config.json
+      NODE_ENV: production
+      TZ: ${TZ:-UTC}
     ports:
-      - ${FLUXER_PORT}:8080
+      - ${FLUXER_PORT:-8080}:8080
     depends_on:
       valkey:
         condition: service_healthy
     volumes:
-      - ${DOCKER_COMPOSE_DIR}/fluxer/config:/usr/src/app/config:ro
-      - ${DOCKER_DATA_DIR}/fluxer/data:/usr/src/app/data
+      - ${DOCKER_COMPOSE_DIR:-.}/fluxer/config:/usr/src/app/config:ro
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/fluxer/data:/usr/src/app/data
     networks:
-      - web
-      - fluxer
+      web:
+      fluxer:
     healthcheck:
       test: ['CMD-SHELL', 'curl -fsS http://127.0.0.1:8080/_health || exit 1']
       interval: 15s

@@ -12,9 +12,9 @@ services:
     ports:
       - ${ACTUAL_BUDGET_PORT:-5006}:5006
     volumes:
-      - ${DOCKER_DATA_DIR}/actual-budget:/data
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/actual-budget:/data
     networks:
-      - web
+      web:
     restart: unless-stopped
 
 networks:

@@ -11,13 +11,13 @@ services:
       TYPE: "AUTO_CURSEFORGE"
       # CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/prominence-2-hasturian-era
       CF_PAGE_URL: https://www.curseforge.com/minecraft/modpacks/all-the-mods-11
-      CF_API_KEY: ${CURSEFORGE_API_KEY}
-      INIT_MEMORY: 8G
-      MAX_MEMORY: 20G
-      USE_AIKAR_FLAGS: "true"
-      TZ: ${TZ}
-      OPS: ${MINECRAFT_OPS:-YourUsername}
-      MOTD: "Willkommen auf dem Server von ${MINECRAFT_OPS}"
+       CF_API_KEY: ${CURSEFORGE_API_KEY:-}
+       INIT_MEMORY: 8G
+       MAX_MEMORY: 20G
+       USE_AIKAR_FLAGS: "true"
+       TZ: ${TZ:-UTC}
+       OPS: ${MINECRAFT_OPS:-YourUsername}
+       MOTD: "Willkommen auf dem Server von ${MINECRAFT_OPS}"
       ENABLE_QUERY: "true"
       QUERY_PORT: 25565
       ENABLE_AUTOPAUSE: "FALSE"
@@ -44,13 +44,13 @@ services:
     tty: true
     stdin_open: true
     networks:
-      - web
+      web:
     restart: unless-stopped
   playit:
     image: ghcr.io/playit-cloud/playit-agent:0.17
     network_mode: host
     environment:
-      - SECRET_KEY=${PLAYIT_SECRET_KEY}
+      SECRET_KEY: ${PLAYIT_SECRET_KEY:-}
 
 networks:
   web:

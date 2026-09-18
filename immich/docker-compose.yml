@@ -25,9 +25,9 @@ services:
       homepage.widget.version: 2
       homepage.widget.key: b4utcL3OXVh2TbXbR7ahzIuHuSCB68QQwOFTbqJT7oY
     environment:
-      DB_PASSWORD: ${IMMICH_DB_PASSWORD}
-      DB_USERNAME: ${IMMICH_DB_USERNAME}
-      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME}
+      DB_PASSWORD: ${IMMICH_DB_PASSWORD:-}
+      DB_USERNAME: ${IMMICH_DB_USERNAME:-}
+      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME:-}
     ports:
       - ${IMMICH_PORT}:2283
     expose:
@@ -35,8 +35,8 @@ services:
     volumes:
       - "${DOCKER_DATA_DIR}/immich/upload:/usr/src/app/upload"
     networks:
-      - web
-      - immich
+      web:
+      immich:
     restart: unless-stopped
 
   immich-machine-learning:
@@ -48,12 +48,12 @@ services:
     volumes:
       - model-cache:/cache
     environment:
-      DB_PASSWORD: ${IMMICH_DB_PASSWORD}
-      DB_USERNAME: ${IMMICH_DB_USERNAME}
-      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME}
+      DB_PASSWORD: ${IMMICH_DB_PASSWORD:-}
+      DB_USERNAME: ${IMMICH_DB_USERNAME:-}
+      DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME:-}
     restart: always
     networks:
-      - immich
+      immich:
     healthcheck:
       disable: false
 
@@ -64,7 +64,7 @@ services:
       test: redis-cli ping || exit 1
     restart: unless-stopped
     networks:
-      - immich
+      immich:
 
   database:
     container_name: immich_postgres
@@ -94,7 +94,7 @@ services:
       ]
     restart: unless-stopped
     networks:
-      - immich
+      immich:
 
 volumes:
   model-cache:

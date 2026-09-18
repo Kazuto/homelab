@@ -3,9 +3,9 @@ services:
     image: linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.prowlarr.entrypoints: websecure
@@ -25,8 +25,8 @@ services:
     volumes:
       - "${DOCKER_DATA_DIR}/prowlarr/data:/config"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
   # bazarr:
@@ -66,9 +66,9 @@ services:
     image: linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.radarr.entrypoints: websecure
@@ -90,17 +90,17 @@ services:
       - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
   sonarr:
     image: linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.sonarr.entrypoints: websecure
@@ -122,8 +122,8 @@ services:
       - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
   # lidarr:
@@ -163,9 +163,9 @@ services:
     image: ghcr.io/hotio/whisparr:latest
     container_name: whisparr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.whisparr.entrypoints: websecure
@@ -187,8 +187,8 @@ services:
       - "/mnt/media:/mnt/media"
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
   # readarr:
@@ -275,7 +275,7 @@ services:
     container_name: seerr
     init: true
     environment:
-      - TZ=${TZ}
+      TZ: ${TZ:-UTC}
     labels:
       traefik.enable: true
       traefik.http.routers.seerr.entrypoints: websecure
@@ -294,8 +294,8 @@ services:
     volumes:
       - "${DOCKER_DATA_DIR}/seerr/config:/app/config"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
   sabnzbd:
@@ -327,8 +327,8 @@ services:
       - "${DOWNLOAD_DIR}/complete:/downloads/complete"
       - "${DOWNLOAD_DIR}/watch:/downloads/watch"
     networks:
-      - web
-      - usenet
+      web:
+      usenet:
     restart: unless-stopped
 
 networks:

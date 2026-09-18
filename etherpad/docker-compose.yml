@@ -31,11 +31,11 @@ services:
     ports:
       - ${ETHERPAD_PORT}:9001
     networks:
-      - web
-      - etherpad
+      web:
+      etherpad:
     volumes:
-      - ${DOCKER_DATA_DIR}/etherpad/var:/opt/etherpad-lite/var
-      - ${DOCKER_DATA_DIR}/etherpad/plugins:/opt/etherpad-lite/src/plugin_packages
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/etherpad/var:/opt/etherpad-lite/var
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/etherpad/plugins:/opt/etherpad-lite/src/plugin_packages
     restart: unless-stopped
 
   postgres:
@@ -47,9 +47,9 @@ services:
       POSTGRES_USER: ${DOCKER_COMPOSE_POSTGRES_USER:-admin}
       PGDATA: /var/lib/postgresql/data/pgdata
     networks:
-      - etherpad
+      etherpad:
     volumes:
-      - ${DOCKER_DATA_DIR}/etherpad/postgres:/var/lib/postgresql/data/pgdata
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/etherpad/postgres:/var/lib/postgresql/data/pgdata
     restart: unless-stopped
 
 networks:

@@ -7,10 +7,10 @@ services:
     volumes:
       - ${DOCKER_DATA_DIR}/spotify/db:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${SPOTIFY_MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${SPOTIFY_MONGO_PASS}
+      MONGO_INITDB_ROOT_USERNAME: ${SPOTIFY_MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${SPOTIFY_MONGO_PASS:-password}
     networks:
-      - web
+      web:
     restart: unless-stopped
 
   spotify:
@@ -28,16 +28,16 @@ services:
       traefik.http.routers.spotify.tls.certresolver: letsencrypt
       traefik.http.services.spotify.loadbalancer.server.port: 80
     networks:
-      - web
+      web:
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${TZ}
-      - APP_URL=https://spotify.${DOMAIN}
-      - MONGO_ENDPOINT=mongodb://${SPOTIFY_MONGO_USER}:${SPOTIFY_MONGO_PASS}@mongo
-      - SPOTIFY_PUBLIC=${SPOTIFY_PUBLIC_KEY}
-      - SPOTIFY_SECRET=${SPOTIFY_PRIVATE_KEY}
-      - CORS=all
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-UTC}
+      APP_URL: https://spotify.${DOMAIN:-example.com}
+      MONGO_ENDPOINT: mongodb://${SPOTIFY_MONGO_USER:-admin}:${SPOTIFY_MONGO_PASS:-password}@mongo
+      SPOTIFY_PUBLIC: ${SPOTIFY_PUBLIC_KEY:-}
+      SPOTIFY_SECRET: ${SPOTIFY_PRIVATE_KEY:-}
+      CORS: all
     restart: unless-stopped
 
 networks:
