@@ -8,22 +8,26 @@ services:
       traefik.http.routers.authelia.entrypoints: websecure
       traefik.http.routers.authelia.tls: true
       traefik.http.routers.authelia.tls.certresolver: letsencrypt
-      traefik.http.services.authelia.loadbalancer.server.port: 8083
+      traefik.http.services.authelia.loadbalancer.server.port: 9091
+      traefik.http.middlewares.authelia.forwardAuth.address: http://authelia:9091/api/authz/forward-auth
+      traefik.http.middlewares.authelia.forwardAuth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia.forwardAuth.maxResponseBodySize: "8192"
+      traefik.http.middlewares.authelia.forwardAuth.authResponseHeaders: Remote-User,Remote-Groups,Remote-Email,Remote-Name
     environment:
-      PUID: ${PUID}
-      PGID: ${PGID}
-      TZ: ${TZ}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Europe/Berlin}
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE: "/secrets/JWT_SECRET"
       AUTHELIA_SESSION_SECRET_FILE: "/secrets/SESSION_SECRET"
       AUTHELIA_STORAGE_POSTGRES_PASSWORD_FILE: "/secrets/STORAGE_PASSWORD"
       AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE: "/secrets/STORAGE_ENCRYPTION_KEY"
     ports:
-      - ${AUTHELIA_PORT}:9091
+      - ${AUTHELIA_PORT:-9091}:9091
     volumes:
-      - "${DOCKER_DATA_DIR}/authelia/config:/config"
-      - "${DOCKER_DATA_DIR}/authelia/secrets:/secrets"
+      - ${DOCKER_DATA_DIR:-/data}/authelia/config:/config
+      - ${DOCKER_DATA_DIR:-/data}/authelia/secrets:/secrets
     networks:
-      - web
+      web:
     restart: unless-stopped
 
 networks:
