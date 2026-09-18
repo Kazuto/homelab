@@ -1,6 +1,6 @@
 services:
   broker:
-    image: docker.io/library/redis:7
+    image: docker.io/valkey/valkey:9-alpine
     restart: unless-stopped
     networks:
       - paperless
@@ -25,6 +25,7 @@ services:
     depends_on:
       - db
       - broker
+      - proton-bridge
     labels:
       traefik.enable: true
       traefik.http.routers.paperless.rule: Host(`docs.${DOMAIN}`)
@@ -44,7 +45,6 @@ services:
     volumes:
       - ${DOCKER_DATA_DIR}/paperless/data:/usr/src/paperless/data
       - ${DOCKER_DATA_DIR}/paperless/media:/usr/src/paperless/media
-      - ${DOCKER_DATA_DIR}/paperless/media:/usr/src/paperless/media
       - /mnt/storage/documents/export:/usr/src/paperless/export
       - /mnt/storage/documents/import:/usr/src/paperless/consume
     networks:
@@ -53,7 +53,20 @@ services:
     environment:
       PAPERLESS_REDIS: redis://broker:6379
       PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
       PAPERLESS_URL: https://docs.${DOMAIN}
+
+  proton-bridge:
+    image: dancwilliams/protonmail-bridge:latest
+    ports:
+      - 1025:25/tcp
+      - 1143:143/tcp
+    volumes:
+      - ${DOCKER_DATA_DIR}/paperless/proton:/root
+    restart: unless-stopped
+    networks:
+      - paperless
 
 networks:
   web:

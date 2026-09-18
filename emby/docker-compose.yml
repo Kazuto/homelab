@@ -1,6 +1,6 @@
 services:
   emby:
-    image: emby/embyserver:4.8.8.0
+    image: emby/embyserver:4.10.0.40
     container_name: emby
     ports:
       - ${EMBY_PORT}:8096
