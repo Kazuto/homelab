@@ -12,6 +12,8 @@ entrypoints:
       insecure: true
       trustedIPs:
         &trustedIps # Start of Clouflare public IP list for HTTP requests, remove this if you don't use it
+        - 127.0.0.1/32
+        - 10.7.2.0/24
         - 173.245.48.0/20
         - 103.21.244.0/22
         - 103.22.200.0/22
