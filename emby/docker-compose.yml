@@ -62,7 +62,13 @@ services:
       homepage.widget.type: jellyfin
       homepage.widget.key: ${JELLYFIN_API_KEY}
       homepage.widget.url: http://${LOCAL_IP}:${JELLYFIN_PORT}
+      homepage.widget.version: 2
       homepage.widget.enableBlocks: true
+      homepage.widget.enableMediaControl: false
+      homepage.widget.expandOneStreamToTwoRows: false
+    user: ${PUID:-1000}:${PGID:-1000}
+    group_add:
+      - "992"
     ports:
       - ${JELLYFIN_PORT}:8096
       - ${JELLYFIN_HTTPS_PORT}:8920
@@ -76,6 +82,51 @@ services:
     networks:
       web:
     restart: "unless-stopped"
+
+  jellystat-db:
+    image: postgres:15.2-alpine
+    container_name: jellystat-db
+    environment:
+      POSTGRES_DB: jfstat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${JELLYSTAT_DB_PASSWORD}
+    volumes:
+      - ${DOCKER_DATA_DIR}/jellystat/db:/var/lib/postgresql/data
+    networks:
+      web:
+    restart: unless-stopped
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${JELLYSTAT_DB_PASSWORD}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JELLYSTAT_JWT_SECRET}
+    labels:
+      traefik.enable: true
+      traefik.http.routers.jellystat.entrypoints: websecure
+      traefik.http.routers.jellystat.tls: true
+      traefik.http.routers.jellystat.tls.certresolver: letsencrypt
+      traefik.http.services.jellystat.loadbalancer.server.port: 3000
+      homepage.group: Media
+      homepage.name: Jellystat
+      homepage.icon: jellystat.png
+      homepage.href: https://jellystat.${DOMAIN}
+      homepage.widget.type: jellystat
+      homepage.widget.url: http://${LOCAL_IP}:${JELLYSTAT_PORT}
+      homepage.widget.key: ${JELLYSTAT_API_KEY}
+    ports:
+      - ${JELLYSTAT_PORT}:3000
+    volumes:
+      - ${DOCKER_DATA_DIR}/jellystat/backup-data:/app/backend/backup-data
+    networks:
+      web:
+    depends_on:
+      - jellystat-db
+    restart: unless-stopped
 
 networks:
   web:
