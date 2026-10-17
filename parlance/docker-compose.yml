@@ -18,7 +18,7 @@ services:
       retries: 5
 
   minio:
-    image: minio/minio:latest
+    image: pgsty/minio
     container_name: parlance-minio
     command: server /data --console-address ":9001"
     environment:
@@ -73,15 +73,29 @@ services:
     container_name: parlance-frontend
     environment:
       NUXT_PUBLIC_API_BASE_URL: http://api:8080
+    labels:
+      traefik.enable: true
+      traefik.http.routers.parlance.entrypoints: websecure
+      traefik.http.routers.parlance.tls: true
+      traefik.http.routers.parlance.tls.certresolver: letsencrypt
+      traefik.http.services.parlance.loadbalancer.server.port: 3000
+      homepage.group: Productivity
+      homepage.name: Parlance
+      homepage.icon: mdi-translate
+      homepage.href: https://parlance.${DOMAIN}
     depends_on:
       - api
     ports:
       - "${PARLANCE_FRONTEND_PORT:-8521}:3000"
     networks:
-      - parlance
+      web:
+      parlance:
     restart: unless-stopped
 
 networks:
+  web:
+    name: traefik_web
+    external: true
   parlance:
     driver: bridge
 
