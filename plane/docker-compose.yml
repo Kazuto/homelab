@@ -1,0 +1,293 @@
+x-db-env: &db-env
+  PGHOST: plane-db
+  PGDATABASE: ${PLANE_DB_NAME:-plane}
+  POSTGRES_USER: ${PLANE_DB_USER:-plane}
+  POSTGRES_PASSWORD: ${PLANE_DB_PASSWORD:-plane}
+  POSTGRES_DB: ${PLANE_DB_NAME:-plane}
+  POSTGRES_PORT: 5432
+  PGDATA: /var/lib/postgresql/data
+
+x-redis-env: &redis-env
+  REDIS_HOST: plane-redis
+  REDIS_PORT: 6379
+  REDIS_URL: redis://plane-redis:6379/
+
+x-minio-env: &minio-env
+  MINIO_ROOT_USER: ${PLANE_S3_ACCESS_KEY:-access-key}
+  MINIO_ROOT_PASSWORD: ${PLANE_S3_SECRET_KEY:-secret-key}
+
+x-aws-s3-env: &aws-s3-env
+  AWS_REGION: ""
+  AWS_ACCESS_KEY_ID: ${PLANE_S3_ACCESS_KEY:-access-key}
+  AWS_SECRET_ACCESS_KEY: ${PLANE_S3_SECRET_KEY:-secret-key}
+  AWS_S3_ENDPOINT_URL: http://plane-minio:9000
+  AWS_S3_BUCKET_NAME: uploads
+
+x-mq-env: &mq-env
+  RABBITMQ_HOST: plane-mq
+  RABBITMQ_PORT: 5672
+  RABBITMQ_DEFAULT_USER: ${PLANE_MQ_USER:-plane}
+  RABBITMQ_DEFAULT_PASS: ${PLANE_MQ_PASSWORD:-plane}
+  RABBITMQ_DEFAULT_VHOST: plane
+  RABBITMQ_VHOST: plane
+
+x-app-env: &app-env
+  APP_DOMAIN: plane.${DOMAIN:-example.com}
+  WEB_URL: https://plane.${DOMAIN:-example.com}
+  CORS_ALLOWED_ORIGINS: https://plane.${DOMAIN:-example.com}
+  DEBUG: 0
+  GUNICORN_WORKERS: ${PLANE_GUNICORN_WORKERS:-1}
+  USE_MINIO: 1
+  # TLS is terminated at traefik, so presigned upload URLs must use https
+  MINIO_ENDPOINT_SSL: 1
+  FILE_SIZE_LIMIT: ${PLANE_FILE_SIZE_LIMIT:-5242880}
+  DATABASE_URL: postgresql://${PLANE_DB_USER:-plane}:${PLANE_DB_PASSWORD:-plane}@plane-db/${PLANE_DB_NAME:-plane}
+  AMQP_URL: amqp://${PLANE_MQ_USER:-plane}:${PLANE_MQ_PASSWORD:-plane}@plane-mq:5672/plane
+  SECRET_KEY: ${PLANE_SECRET_KEY:-change-this-key-on-deployment}
+  LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY:-change-this-key-on-deployment}
+  API_KEY_RATE_LIMIT: 60/minute
+
+x-backend: &backend
+  image: makeplane/plane-backend:${PLANE_RELEASE:-stable}
+  restart: unless-stopped
+  environment:
+    <<: [*app-env, *db-env, *redis-env, *minio-env, *aws-s3-env]
+  networks:
+    plane:
+
+services:
+  plane-web:
+    image: makeplane/plane-frontend:${PLANE_RELEASE:-stable}
+    container_name: plane-web
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane.rule: Host(`plane.${DOMAIN:-example.com}`)
+      traefik.http.routers.plane.entrypoints: websecure
+      traefik.http.routers.plane.tls: true
+      traefik.http.routers.plane.tls.certresolver: letsencrypt
+      traefik.http.routers.plane.priority: 1
+      traefik.http.services.plane.loadbalancer.server.port: 3000
+      homepage.group: Productivity
+      homepage.name: Plane
+      homepage.icon: plane.png
+      homepage.href: https://plane.${DOMAIN:-example.com}
+    networks:
+      web:
+      plane:
+        # hostname expected by plane-proxy's Caddyfile
+        aliases:
+          - web
+    depends_on:
+      - plane-api
+
+  plane-space:
+    image: makeplane/plane-space:${PLANE_RELEASE:-stable}
+    container_name: plane-space
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane-space.rule: Host(`plane.${DOMAIN:-example.com}`) && PathPrefix(`/spaces`)
+      traefik.http.routers.plane-space.entrypoints: websecure
+      traefik.http.routers.plane-space.tls: true
+      traefik.http.routers.plane-space.tls.certresolver: letsencrypt
+      traefik.http.routers.plane-space.priority: 10
+      traefik.http.services.plane-space.loadbalancer.server.port: 3000
+    networks:
+      web:
+      plane:
+        # hostname expected by plane-proxy's Caddyfile
+        aliases:
+          - space
+    depends_on:
+      - plane-api
+
+  plane-admin:
+    image: makeplane/plane-admin:${PLANE_RELEASE:-stable}
+    container_name: plane-admin
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane-admin.rule: Host(`plane.${DOMAIN:-example.com}`) && PathPrefix(`/god-mode`)
+      traefik.http.routers.plane-admin.entrypoints: websecure
+      traefik.http.routers.plane-admin.tls: true
+      traefik.http.routers.plane-admin.tls.certresolver: letsencrypt
+      traefik.http.routers.plane-admin.priority: 10
+      # admin redirects /god-mode to its internal :3000 address, so add the trailing slash here
+      traefik.http.routers.plane-admin.middlewares: plane-admin-slash
+      traefik.http.middlewares.plane-admin-slash.redirectregex.regex: ^(https?://[^/]+)/god-mode$$
+      traefik.http.middlewares.plane-admin-slash.redirectregex.replacement: $${1}/god-mode/
+      traefik.http.middlewares.plane-admin-slash.redirectregex.permanent: true
+      traefik.http.services.plane-admin.loadbalancer.server.port: 3000
+    networks:
+      web:
+      plane:
+        # hostname expected by plane-proxy's Caddyfile
+        aliases:
+          - admin
+    depends_on:
+      - plane-api
+
+  plane-live:
+    image: makeplane/plane-live:${PLANE_RELEASE:-stable}
+    container_name: plane-live
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane-live.rule: Host(`plane.${DOMAIN:-example.com}`) && PathPrefix(`/live`)
+      traefik.http.routers.plane-live.entrypoints: websecure
+      traefik.http.routers.plane-live.tls: true
+      traefik.http.routers.plane-live.tls.certresolver: letsencrypt
+      traefik.http.routers.plane-live.priority: 10
+      traefik.http.services.plane-live.loadbalancer.server.port: 3000
+    environment:
+      <<: *redis-env
+      API_BASE_URL: http://plane-api:8000
+      LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY:-change-this-key-on-deployment}
+    networks:
+      web:
+      plane:
+        # hostname expected by plane-proxy's Caddyfile
+        aliases:
+          - live
+    depends_on:
+      - plane-api
+
+  plane-api:
+    <<: *backend
+    container_name: plane-api
+    command: ./bin/docker-entrypoint-api.sh
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane-api.rule: Host(`plane.${DOMAIN:-example.com}`) && (PathPrefix(`/api`) || PathPrefix(`/auth`) || PathPrefix(`/static`))
+      traefik.http.routers.plane-api.entrypoints: websecure
+      traefik.http.routers.plane-api.tls: true
+      traefik.http.routers.plane-api.tls.certresolver: letsencrypt
+      traefik.http.routers.plane-api.priority: 10
+      traefik.http.services.plane-api.loadbalancer.server.port: 8000
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/api:/code/plane/logs
+    networks:
+      web:
+      plane:
+        # hostname expected by plane-proxy's Caddyfile
+        aliases:
+          - api
+    depends_on:
+      - plane-db
+      - plane-redis
+      - plane-mq
+      - plane-minio
+
+  plane-worker:
+    <<: *backend
+    container_name: plane-worker
+    command: ./bin/docker-entrypoint-worker.sh
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/worker:/code/plane/logs
+    depends_on:
+      - plane-api
+
+  plane-beat-worker:
+    <<: *backend
+    container_name: plane-beat-worker
+    command: ./bin/docker-entrypoint-beat.sh
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/beat-worker:/code/plane/logs
+    depends_on:
+      - plane-api
+
+  plane-migrator:
+    <<: *backend
+    container_name: plane-migrator
+    command: ./bin/docker-entrypoint-migrator.sh
+    restart: on-failure
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/migrator:/code/plane/logs
+    depends_on:
+      - plane-db
+      - plane-redis
+
+  plane-db:
+    image: docker.io/library/postgres:15.7-alpine
+    container_name: plane-db
+    restart: unless-stopped
+    command: postgres -c 'max_connections=1000'
+    environment:
+      <<: *db-env
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/postgresql:/var/lib/postgresql/data
+    networks:
+      plane:
+
+  plane-redis:
+    image: docker.io/valkey/valkey:7.2.11-alpine
+    container_name: plane-redis
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/redis:/data
+    networks:
+      plane:
+
+  plane-mq:
+    image: docker.io/library/rabbitmq:3.13.6-management-alpine
+    container_name: plane-mq
+    restart: unless-stopped
+    environment:
+      <<: *mq-env
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/rabbitmq:/var/lib/rabbitmq
+    networks:
+      plane:
+
+  plane-minio:
+    image: pgsty/minio:latest
+    container_name: plane-minio
+    restart: unless-stopped
+    command: server /export --console-address ":9090"
+    labels:
+      traefik.enable: true
+      traefik.http.routers.plane-uploads.rule: Host(`plane.${DOMAIN:-example.com}`) && PathPrefix(`/uploads`)
+      traefik.http.routers.plane-uploads.entrypoints: websecure
+      traefik.http.routers.plane-uploads.tls: true
+      traefik.http.routers.plane-uploads.tls.certresolver: letsencrypt
+      traefik.http.routers.plane-uploads.priority: 10
+      traefik.http.services.plane-uploads.loadbalancer.server.port: 9000
+    environment:
+      <<: *minio-env
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/uploads:/export
+    networks:
+      web:
+      plane:
+
+  # Plain HTTP LAN entrypoint; deliberately kept off traefik_web
+  plane-proxy:
+    image: makeplane/plane-proxy:${PLANE_RELEASE:-stable}
+    container_name: plane-proxy
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: plane.${DOMAIN:-example.com}
+      SITE_ADDRESS: :80
+      FILE_SIZE_LIMIT: ${PLANE_FILE_SIZE_LIMIT:-5242880}
+      BUCKET_NAME: uploads
+    ports:
+      - ${PLANE_HTTP_PORT:-8530}:80
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/proxy/config:/config
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/proxy/data:/data
+    networks:
+      plane:
+    depends_on:
+      - plane-web
+      - plane-space
+      - plane-admin
+      - plane-live
+      - plane-api
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  plane:
+    name: plane

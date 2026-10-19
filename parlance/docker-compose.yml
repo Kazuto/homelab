@@ -49,7 +49,7 @@ services:
       DB_SSL_MODE: disable
       JWT_SECRET: ${PARLANCE_JWT_SECRET}
       JWT_EXPIRY: 24h
-      CORS_ALLOWED_ORIGINS: http://localhost:${PARLANCE_FRONTEND_PORT:-8521}
+      CORS_ALLOWED_ORIGINS: https://parlance.${DOMAIN}
       DEEPL_API_KEY: ${PARLANCE_DEEPL_API_KEY:-}
       DEEPL_API_URL: https://api.deepl.com/v2
       S3_ENDPOINT: minio:9000
@@ -57,6 +57,14 @@ services:
       S3_SECRET_KEY: ${PARLANCE_MINIO_ROOT_PASSWORD:-changeme}
       S3_BUCKET: ${PARLANCE_MINIO_BUCKET:-parlance}
       S3_USE_SSL: "false"
+    labels:
+      traefik.enable: true
+      traefik.docker.network: traefik_web
+      traefik.http.routers.parlance-api.rule: Host(`parlance.${DOMAIN}`) && PathPrefix(`/parlance.v1.`)
+      traefik.http.routers.parlance-api.entrypoints: websecure
+      traefik.http.routers.parlance-api.tls: true
+      traefik.http.routers.parlance-api.tls.certresolver: letsencrypt
+      traefik.http.services.parlance-api.loadbalancer.server.port: 8080
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,16 +73,19 @@ services:
     ports:
       - "${PARLANCE_API_PORT:-8520}:8080"
     networks:
-      - parlance
+      web:
+      parlance:
     restart: unless-stopped
 
   frontend:
     image: ghcr.io/kazuto/parlance-frontend:develop
     container_name: parlance-frontend
     environment:
-      NUXT_PUBLIC_API_BASE_URL: http://api:8080
+      NUXT_PUBLIC_API_BASE_URL: https://parlance.${DOMAIN}
     labels:
       traefik.enable: true
+      traefik.docker.network: traefik_web
+      traefik.http.routers.parlance.rule: Host(`parlance.${DOMAIN}`)
       traefik.http.routers.parlance.entrypoints: websecure
       traefik.http.routers.parlance.tls: true
       traefik.http.routers.parlance.tls.certresolver: letsencrypt
