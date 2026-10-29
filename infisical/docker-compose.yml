@@ -1,0 +1,69 @@
+services:
+  # Must not pull its own secrets from Infisical; deploy with the plain .env file
+  infisical:
+    image: infisical/infisical:${INFISICAL_RELEASE:-v0.167.4}
+    container_name: infisical
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.infisical.rule: Host(`secrets.${DOMAIN}`)
+      traefik.http.routers.infisical.entrypoints: websecure
+      traefik.http.routers.infisical.tls: true
+      traefik.http.routers.infisical.tls.certresolver: letsencrypt
+      traefik.http.services.infisical.loadbalancer.server.port: 8080
+      homepage.group: Homelab
+      homepage.name: Infisical
+      homepage.icon: infisical.png
+      homepage.href: https://secrets.${DOMAIN}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      SITE_URL: https://secrets.${DOMAIN}
+      # Losing ENCRYPTION_KEY makes every stored secret unrecoverable; back it up outside the homelab
+      ENCRYPTION_KEY: ${INFISICAL_ENCRYPTION_KEY:?}
+      AUTH_SECRET: ${INFISICAL_AUTH_SECRET:?}
+      DB_CONNECTION_URI: postgres://${INFISICAL_DB_USER:-infisical}:${INFISICAL_DB_PASSWORD}@infisical-db:5432/${INFISICAL_DB_NAME:-infisical}
+      REDIS_URL: redis://infisical-redis:6379
+      TELEMETRY_ENABLED: false
+    networks:
+      web:
+      infisical:
+    depends_on:
+      infisical-db:
+        condition: service_healthy
+      infisical-redis:
+        condition: service_started
+
+  infisical-db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: infisical-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${INFISICAL_DB_USER:-infisical}
+      POSTGRES_PASSWORD: ${INFISICAL_DB_PASSWORD:?}
+      POSTGRES_DB: ${INFISICAL_DB_NAME:-infisical}
+    healthcheck:
+      test: pg_isready --username=$${POSTGRES_USER} --dbname=$${POSTGRES_DB}
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/infisical/postgresql:/var/lib/postgresql/data
+    networks:
+      infisical:
+
+  infisical-redis:
+    image: docker.io/valkey/valkey:7.2.11-alpine
+    container_name: infisical-redis
+    restart: unless-stopped
+    volumes:
+      - ${DOCKER_DATA_DIR:-/var/lib/docker}/infisical/redis:/data
+    networks:
+      infisical:
+
+networks:
+  web:
+    name: traefik_web
+    external: true
+  infisical:
+    name: infisical
