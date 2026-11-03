@@ -1,9 +1,9 @@
 x-db-env: &db-env
   PGHOST: plane-db
-  PGDATABASE: ${PLANE_DB_NAME:-plane}
-  POSTGRES_USER: ${PLANE_DB_USER:-plane}
-  POSTGRES_PASSWORD: ${PLANE_DB_PASSWORD:-plane}
-  POSTGRES_DB: ${PLANE_DB_NAME:-plane}
+  PGDATABASE: ${PLANE_DB_NAME}
+  POSTGRES_USER: ${PLANE_DB_USER}
+  POSTGRES_PASSWORD: ${PLANE_DB_PASSWORD}
+  POSTGRES_DB: ${PLANE_DB_NAME}
   POSTGRES_PORT: 5432
   PGDATA: /var/lib/postgresql/data
 
@@ -13,38 +13,38 @@ x-redis-env: &redis-env
   REDIS_URL: redis://plane-redis:6379/
 
 x-minio-env: &minio-env
-  MINIO_ROOT_USER: ${PLANE_S3_ACCESS_KEY:-access-key}
-  MINIO_ROOT_PASSWORD: ${PLANE_S3_SECRET_KEY:-secret-key}
+  MINIO_ROOT_USER: ${PLANE_S3_ACCESS_KEY}
+  MINIO_ROOT_PASSWORD: ${PLANE_S3_SECRET_KEY}
 
 x-aws-s3-env: &aws-s3-env
   AWS_REGION: ""
-  AWS_ACCESS_KEY_ID: ${PLANE_S3_ACCESS_KEY:-access-key}
-  AWS_SECRET_ACCESS_KEY: ${PLANE_S3_SECRET_KEY:-secret-key}
+  AWS_ACCESS_KEY_ID: ${PLANE_S3_ACCESS_KEY}
+  AWS_SECRET_ACCESS_KEY: ${PLANE_S3_SECRET_KEY}
   AWS_S3_ENDPOINT_URL: http://plane-minio:9000
   AWS_S3_BUCKET_NAME: uploads
 
 x-mq-env: &mq-env
   RABBITMQ_HOST: plane-mq
   RABBITMQ_PORT: 5672
-  RABBITMQ_DEFAULT_USER: ${PLANE_MQ_USER:-plane}
-  RABBITMQ_DEFAULT_PASS: ${PLANE_MQ_PASSWORD:-plane}
+  RABBITMQ_DEFAULT_USER: ${PLANE_MQ_USER}
+  RABBITMQ_DEFAULT_PASS: ${PLANE_MQ_PASSWORD}
   RABBITMQ_DEFAULT_VHOST: plane
   RABBITMQ_VHOST: plane
 
 x-app-env: &app-env
-  APP_DOMAIN: plane.${DOMAIN:-example.com}
-  WEB_URL: https://plane.${DOMAIN:-example.com}
-  CORS_ALLOWED_ORIGINS: https://plane.${DOMAIN:-example.com}
+  APP_DOMAIN: plane.${DOMAIN}
+  WEB_URL: https://plane.${DOMAIN}
+  CORS_ALLOWED_ORIGINS: https://plane.${DOMAIN}
   DEBUG: 0
   GUNICORN_WORKERS: ${PLANE_GUNICORN_WORKERS:-1}
   USE_MINIO: 1
   # TLS is terminated at traefik, so presigned upload URLs must use https
   MINIO_ENDPOINT_SSL: 1
   FILE_SIZE_LIMIT: ${PLANE_FILE_SIZE_LIMIT:-5242880}
-  DATABASE_URL: postgresql://${PLANE_DB_USER:-plane}:${PLANE_DB_PASSWORD:-plane}@plane-db/${PLANE_DB_NAME:-plane}
-  AMQP_URL: amqp://${PLANE_MQ_USER:-plane}:${PLANE_MQ_PASSWORD:-plane}@plane-mq:5672/plane
-  SECRET_KEY: ${PLANE_SECRET_KEY:-change-this-key-on-deployment}
-  LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY:-change-this-key-on-deployment}
+  DATABASE_URL: postgresql://${PLANE_DB_USER}:${PLANE_DB_PASSWORD}@plane-db/${PLANE_DB_NAME}
+  AMQP_URL: amqp://${PLANE_MQ_USER}:${PLANE_MQ_PASSWORD}@plane-mq:5672/plane
+  SECRET_KEY: ${PLANE_SECRET_KEY}
+  LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY}
   API_KEY_RATE_LIMIT: 60/minute
 
 x-backend: &backend
@@ -143,7 +143,7 @@ services:
     environment:
       <<: *redis-env
       API_BASE_URL: http://plane-api:8000
-      LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY:-change-this-key-on-deployment}
+      LIVE_SERVER_SECRET_KEY: ${PLANE_LIVE_SECRET_KEY}
     networks:
       web:
       plane:
@@ -166,7 +166,7 @@ services:
       traefik.http.routers.plane-api.priority: 10
       traefik.http.services.plane-api.loadbalancer.server.port: 8000
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/api:/code/plane/logs
+      - ${DOCKER_DATA_DIR}/plane/logs/api:/code/plane/logs
     networks:
       web:
       plane:
@@ -184,7 +184,7 @@ services:
     container_name: plane-worker
     command: ./bin/docker-entrypoint-worker.sh
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/worker:/code/plane/logs
+      - ${DOCKER_DATA_DIR}/plane/logs/worker:/code/plane/logs
     depends_on:
       - plane-api
 
@@ -193,7 +193,7 @@ services:
     container_name: plane-beat-worker
     command: ./bin/docker-entrypoint-beat.sh
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/beat-worker:/code/plane/logs
+      - ${DOCKER_DATA_DIR}/plane/logs/beat-worker:/code/plane/logs
     depends_on:
       - plane-api
 
@@ -203,7 +203,7 @@ services:
     command: ./bin/docker-entrypoint-migrator.sh
     restart: on-failure
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/logs/migrator:/code/plane/logs
+      - ${DOCKER_DATA_DIR}/plane/logs/migrator:/code/plane/logs
     depends_on:
       - plane-db
       - plane-redis
@@ -216,7 +216,7 @@ services:
     environment:
       <<: *db-env
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/postgresql:/var/lib/postgresql/data
+      - ${DOCKER_DATA_DIR}/plane/postgresql:/var/lib/postgresql/data
     networks:
       plane:
 
@@ -225,7 +225,7 @@ services:
     container_name: plane-redis
     restart: unless-stopped
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/redis:/data
+      - ${DOCKER_DATA_DIR}/plane/redis:/data
     networks:
       plane:
 
@@ -236,7 +236,7 @@ services:
     environment:
       <<: *mq-env
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/rabbitmq:/var/lib/rabbitmq
+      - ${DOCKER_DATA_DIR}/plane/rabbitmq:/var/lib/rabbitmq
     networks:
       plane:
 
@@ -247,7 +247,7 @@ services:
     command: server /export --console-address ":9090"
     labels:
       traefik.enable: true
-      traefik.http.routers.plane-uploads.rule: Host(`plane.${DOMAIN:-example.com}`) && PathPrefix(`/uploads`)
+      traefik.http.routers.plane-uploads.rule: Host(`plane.${DOMAIN}`) && PathPrefix(`/uploads`)
       traefik.http.routers.plane-uploads.entrypoints: websecure
       traefik.http.routers.plane-uploads.tls: true
       traefik.http.routers.plane-uploads.tls.certresolver: letsencrypt
@@ -256,7 +256,7 @@ services:
     environment:
       <<: *minio-env
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/uploads:/export
+      - ${DOCKER_DATA_DIR}/plane/uploads:/export
     networks:
       web:
       plane:
@@ -267,15 +267,15 @@ services:
     container_name: plane-proxy
     restart: unless-stopped
     environment:
-      APP_DOMAIN: plane.${DOMAIN:-example.com}
+      APP_DOMAIN: plane.${DOMAIN}
       SITE_ADDRESS: :80
       FILE_SIZE_LIMIT: ${PLANE_FILE_SIZE_LIMIT:-5242880}
       BUCKET_NAME: uploads
     ports:
       - ${PLANE_HTTP_PORT:-8530}:80
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/proxy/config:/config
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/plane/proxy/data:/data
+      - ${DOCKER_DATA_DIR}/plane/proxy/config:/config
+      - ${DOCKER_DATA_DIR}/plane/proxy/data:/data
     networks:
       plane:
     depends_on:

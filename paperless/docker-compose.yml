@@ -5,19 +5,19 @@ services:
     networks:
       paperless:
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/paperless/redis:/data
+      - ${DOCKER_DATA_DIR}/paperless/redis:/data
 
   db:
     image: docker.io/library/postgres:17
     restart: unless-stopped
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/paperless/postgresql:/var/lib/postgresql/data
+      - ${DOCKER_DATA_DIR}/paperless/postgresql:/var/lib/postgresql/data
     networks:
       paperless:
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-paperless}
-      POSTGRES_USER: ${POSTGRES_USER:-paperless}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-paperless}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   webserver:
     image: ghcr.io/paperless-ngx/paperless-ngx:latest
@@ -28,7 +28,7 @@ services:
       - proton-bridge
     labels:
       traefik.enable: true
-      traefik.http.routers.paperless.rule: Host(`docs.${DOMAIN:-example.com}`)
+      traefik.http.routers.paperless.rule: Host(`docs.${DOMAIN}`)
       traefik.http.routers.paperless.entrypoints: websecure
       traefik.http.routers.paperless.tls: true
       traefik.http.routers.paperless.tls.certresolver: letsencrypt
@@ -36,26 +36,26 @@ services:
       homepage.group: Media
       homepage.name: Paperless
       homepage.icon: paperless-ngx.png
-      homepage.href: https://docs.${DOMAIN:-example.com}
+      homepage.href: https://docs.${DOMAIN}
       homepage.widget.type: paperlessngx
-      homepage.widget.key: ${PAPERLESS_API_KEY:-key}
-      homepage.widget.url: http://${LOCAL_IP:-127.0.0.1}:${PAPERLESS_PORT:-8000}
-    ports:
-      - ${PAPERLESS_PORT:-8000}:8000
+      homepage.widget.key: ${PAPERLESS_API_KEY}
+      homepage.widget.url: http://webserver:8000
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/paperless/data:/usr/src/paperless/data
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/paperless/media:/usr/src/paperless/media
+      - ${DOCKER_DATA_DIR}/paperless/data:/usr/src/paperless/data
+      - ${DOCKER_DATA_DIR}/paperless/media:/usr/src/paperless/media
       - /mnt/storage/documents/export:/usr/src/paperless/export
       - /mnt/storage/documents/import:/usr/src/paperless/consume
     networks:
       web:
       paperless:
     environment:
-      PAPERLESS_REDIS: ${PAPERLESS_REDIS:-redis://broker:6379}
-      PAPERLESS_DBHOST: ${PAPERLESS_DBHOST:-db}
-      PAPERLESS_DBENGINE: ${PAPERLESS_DBENGINE:-postgresql}
-      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-secret}
-      PAPERLESS_URL: https://docs.${DOMAIN:-example.com}
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DBUSER: ${POSTGRES_USER}
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD} 
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: https://docs.${DOMAIN}
 
   proton-bridge:
     image: dancwilliams/protonmail-bridge:latest
@@ -63,7 +63,7 @@ services:
       - 1025:25/tcp
       - 1143:143/tcp
     volumes:
-      - ${DOCKER_DATA_DIR:-/var/lib/docker}/paperless/proton:/root
+      - ${DOCKER_DATA_DIR}/paperless/proton:/root
     restart: unless-stopped
     networks:
       paperless:

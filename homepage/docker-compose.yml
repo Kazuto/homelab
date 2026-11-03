@@ -5,15 +5,13 @@ services:
     environment:
       # PUID: ${PUID}
       # PGID: ${PGID}
-      HOMEPAGE_ALLOWED_HOSTS: homepage.fae.sh,${LOCAL_IP:-127.0.0.1}:${HOMEPAGE_PORT:-3000} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      HOMEPAGE_ALLOWED_HOSTS: homepage.fae.sh # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
     labels:
       traefik.enable: true
       traefik.http.routers.homepage.entrypoints: websecure
       traefik.http.routers.homepage.tls: true
       traefik.http.routers.homepage.tls.certresolver: letsencrypt
       traefik.http.services.homepage.loadbalancer.server.port: 3000
-    ports:
-      - ${HOMEPAGE_PORT}:3000
     networks:
       web:
     volumes:

@@ -1,14 +1,12 @@
 services:
   mongo:
     container_name: mongo
-    image: mongo:latest
-    ports:
-      - 27017:27017
+    image: mongo:8.2
     volumes:
       - ${DOCKER_DATA_DIR}/spotify/db:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${SPOTIFY_MONGO_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${SPOTIFY_MONGO_PASS:-password}
+      MONGO_INITDB_ROOT_USERNAME: ${SPOTIFY_MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${SPOTIFY_MONGO_PASS}
     networks:
       web:
     restart: unless-stopped
@@ -16,9 +14,6 @@ services:
   spotify:
     image: lscr.io/linuxserver/your_spotify:latest
     container_name: spotify
-    ports:
-      - ${SPOTIFY_PORT}:80
-      - ${SPOTIFY_HTTPS_PORT}:443
     depends_on:
       - mongo
     labels:
@@ -30,13 +25,13 @@ services:
     networks:
       web:
     environment:
-      PUID: ${PUID:-1000}
-      PGID: ${PGID:-1000}
-      TZ: ${TZ:-UTC}
-      APP_URL: https://spotify.${DOMAIN:-example.com}
-      MONGO_ENDPOINT: mongodb://${SPOTIFY_MONGO_USER:-admin}:${SPOTIFY_MONGO_PASS:-password}@mongo
-      SPOTIFY_PUBLIC: ${SPOTIFY_PUBLIC_KEY:-}
-      SPOTIFY_SECRET: ${SPOTIFY_PRIVATE_KEY:-}
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      APP_URL: https://spotify.${DOMAIN}
+      MONGO_ENDPOINT: mongodb://${SPOTIFY_MONGO_USER}:${SPOTIFY_MONGO_PASS}@mongo
+      SPOTIFY_PUBLIC: ${SPOTIFY_PUBLIC_KEY}
+      SPOTIFY_SECRET: ${SPOTIFY_PRIVATE_KEY}
       CORS: all
     restart: unless-stopped
 

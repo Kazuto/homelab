@@ -33,13 +33,13 @@ services:
       homepage.widget.type: traefik
       homepage.widget.url: http://${LOCAL_IP}:${TRAEFIK_DASHBOARD_PORT}
     environment:
-      DOMAIN: ${DOMAIN:-example.com}
-      CF_API_EMAIL: ${CF_API_EMAIL:-admin@example.com}
-      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN:-token}
+      DOMAIN: ${DOMAIN}
+      CF_API_EMAIL: ${CF_API_EMAIL}
+      CF_DNS_API_TOKEN: ${CF_DNS_API_TOKEN}
     ports:
-      - ${TRAEFIK_PORT:-80}:80
-      - ${TRAEFIK_HTTPS_PORT:-443}:443
-      - ${TRAEFIK_DASHBOARD_PORT:-8080}:8080
+      - 80:80
+      - 443:443
+      - 8080:8080
     volumes:
       - ${DOCKER_COMPOSE_DIR}/network/:/etc/traefik/
       - ${DOCKER_DATA_DIR}/letsencrypt/:/letsencrypt
@@ -53,7 +53,7 @@ services:
     container_name: cloudflared-tunnel
     command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
     environment:
-      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN:-token}
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN}
     networks:
       web:
     restart: unless-stopped
@@ -74,37 +74,6 @@ services:
     ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "${ADGUARD_PORT}:80/tcp"
-      - "${ADGUARD_HTTPS_PORT}:3000/tcp"
-    networks:
-      web:
-
-  diun:
-    image: crazymax/diun:latest
-    container_name: diun
-    restart: unless-stopped
-    volumes:
-      - ${DOCKER_DATA_DIR}/diun/data:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      TZ: ${TZ:-Europe/Berlin}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      DIUN_WATCH_SCHEDULE: ${DIUN_WATCH_SCHEDULE:-0 */6 * * *}
-      DIUN_PROVIDERS_DOCKER: ${DIUN_PROVIDERS_DOCKER:-true}
-      DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT: ${DIUN_PROVIDERS_DOCKER_WATCHBYDEFAULT:-true}
-      DIUN_NOTIF_DISCORD_WEBHOOKURL: ${DIUN_NOTIF_DISCORD_WEBHOOKURL:-webhook}
-    networks:
-      web:
-
-  cloudflare-ddns:
-    image: oznu/cloudflare-ddns:latest
-    container_name: cloudflare-ddns
-    restart: unless-stopped
-    environment:
-      API_KEY: ${CF_DNS_API_TOKEN:-token}
-      ZONE: ${DOMAIN:-example.com}
-      SUBDOMAIN: ${CF_DDNS_SUBDOMAIN:-mc}
-      PROXIED: ${CF_DDNS_PROXIED:-false}
     networks:
       web:
 

@@ -28,10 +28,6 @@ services:
       DB_PASSWORD: ${IMMICH_DB_PASSWORD:-}
       DB_USERNAME: ${IMMICH_DB_USERNAME:-}
       DB_DATABASE_NAME: ${IMMICH_DB_DATABASE_NAME:-}
-    ports:
-      - ${IMMICH_PORT}:2283
-    expose:
-      - 2283
     volumes:
       - "${DOCKER_DATA_DIR}/immich/upload:/usr/src/app/upload"
     networks:

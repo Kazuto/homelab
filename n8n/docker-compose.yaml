@@ -14,8 +14,6 @@ services:
       - TZ=${TZ}
       - WEBHOOK_URL="https://n8n.${DOMAIN}"
       - N8N_PROXY_HOPS=1
-    ports:
-      - ${N8N_PORT}:5678
     volumes:
       - "${DOCKER_DATA_DIR}/n8n/data:/home/node/.n8n"
     networks:
