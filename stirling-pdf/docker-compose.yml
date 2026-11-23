@@ -1,0 +1,31 @@
+services:
+  stirling-pdf:
+    image: docker.stirlingpdf.com/stirlingtools/stirling-pdf:latest
+    container_name: stirling-pdf
+    labels:
+      traefik.enable: true
+      traefik.http.routers.stirling-pdf.rule: Host(`pdf.${DOMAIN}`)
+      traefik.http.routers.stirling-pdf.entrypoints: websecure
+      traefik.http.routers.stirling-pdf.tls: true
+      traefik.http.routers.stirling-pdf.tls.certresolver: letsencrypt
+      traefik.http.services.stirling-pdf.loadbalancer.server.port: 8080
+      homepage.group: Productivity
+      homepage.name: Stirling PDF
+      homepage.icon: stirling-pdf.png
+      homepage.href: https://pdf.${DOMAIN}
+    volumes:
+      - ${DOCKER_DATA_DIR}/stirling-pdf/configs:/configs
+      - ${DOCKER_DATA_DIR}/stirling-pdf/logs:/logs
+      - ${DOCKER_DATA_DIR}/stirling-pdf/customFiles:/customFiles
+      - ${DOCKER_DATA_DIR}/stirling-pdf/pipeline:/pipeline
+      - ${DOCKER_DATA_DIR}/stirling-pdf/storage:/storage
+      - ${DOCKER_DATA_DIR}/stirling-pdf/tessdata:/usr/share/tessdata
+    mem_limit: 4g
+    networks:
+      web:
+    restart: unless-stopped
+
+networks:
+  web:
+    name: traefik_web
+    external: true
